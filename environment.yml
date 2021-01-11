@@ -1,0 +1,10 @@
+name : cl 
+dependencies:
+- python
+- jupyter
+- pandas
+- pip:
+  - numpy
+  - requests
+  - pillow
+  - flask-appbuilder
