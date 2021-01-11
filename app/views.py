@@ -99,6 +99,16 @@ def getChoices():
         U.choices = choices
     if os.path.exists(os.path.join(app.config["UPLOAD_FOLDER"],app.config["INSTRUCTOR"])):
         U.instructor = pd.read_csv(os.path.join(app.config["UPLOAD_FOLDER"],app.config["INSTRUCTOR"]))
+        if U.instructor.shape[1]==2:
+            U.instructor['FirstP'] = ""
+            U.instructor['SecondP'] = ""
+            U.instructor['ThirdP'] = ""
+            U.instructor['FourthP'] = ""
+            U.instructor['FifthP'] = ""
+            U.instructor['FirstN'] = ""
+            U.instructor['SecondN'] = ""
+            U.instructor['ThirdN'] = ""
+
     if os.path.exists(os.path.join(app.config["UPLOAD_FOLDER"],app.config["SYSCONFIG"])):
         U.sysconfig = pd.read_csv(os.path.join(app.config["UPLOAD_FOLDER"],app.config["SYSCONFIG"]))
 
