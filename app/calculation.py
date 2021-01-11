@@ -190,7 +190,7 @@ class Calculator():
         self.mincost = 1000
         start=time.time()
         greedycost,greedytrace = self.greedy(self.W, self.teachers)
-        self.mincost = greedycost + 0.3
+        self.mincost = greedycost + 0.2
         self.dfs(0)
         for i in range(len(self.best3cost)):
             log.debug("Strategy "+str(i)+":"+str(self.best3cost[i]))

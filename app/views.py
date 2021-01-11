@@ -189,7 +189,7 @@ appbuilder.add_view(
 class DownloadView(BaseView):
     #route_base = "/download"
     default_view = "method1"
-    error_message = "Compress Failed!"
+    error_message = "Compress Failed or No Files found!"
     @expose('/method1/')
     @has_access
     def method1(self):
@@ -202,6 +202,8 @@ class DownloadView(BaseView):
 
     def csvs(self):
         compressed_file = os.path.join(app.config['FILE_FOLDER'],"csvs.zip")
+        if not os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'],app.config['SYSCONFIG'])):
+            return 0
         z = zipfile.ZipFile(compressed_file, 'w' ,zipfile.ZIP_DEFLATED)
         for i in os.listdir(app.config['UPLOAD_FOLDER']):
             #compress_file(compressed_file,os.path.join(app.config["UPLOAD_FOLDER"],i))

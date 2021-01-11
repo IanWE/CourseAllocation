@@ -11,6 +11,6 @@ Weight_for_courses_taught_in_the_past_13-24_months,0.2
 Weight_for_other_courses_taught,0.3
 Weight_for_courses_never_taught,0.4
 Penalty_for_teaching_courses,0.02
-Penalty_for_teaching_more_courses,1
+Penalty_for_teaching_more_courses,2
 Year,2021
-Term,1
+Term,2
