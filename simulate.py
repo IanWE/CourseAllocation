@@ -18,10 +18,11 @@ for i in range(a.shape[0]):
     y = str(datetime.datetime.now().year)
     date = int(time.time()/(60*60*24))
 
-t = str(datetime.datetime.now().year-2)+"-"+str(datetime.datetime.now().month)
-for i in range(a.shape[0]):
-    a.loc[i,t] = random.sample(a.iloc[i,2:7].tolist(),1)[0]
+#t = str(datetime.datetime.now().year-2)+"-"+str(datetime.datetime.now().month)
+#for i in range(a.shape[0]):
+#    a.loc[i,t] = random.sample(a.iloc[i,2:7].tolist(),1)[0]
 
+a.to_csv("./temp_instructor.csv",index=False)
 #t = str(datetime.datetime.now().year-1)+"-"+str(datetime.datetime.now().month-1)
 #for i in range(a.shape[0]):
 #    a.loc[i,t] = random.sample(a.iloc[i,2:7].tolist(),1)[0]
@@ -205,5 +206,5 @@ print("The procession took "+str(end-start)+" seconds")
 for i in range(a.shape[0]):
     a.iloc[i,a.shape[1]-1] = b[b.Code==a.iloc[i,a.shape[1]-1]].Course.values[0]
 a.to_csv("temp_instructor.csv",index=False)
-b.to_csv("temp_course.csv",index=False)
+#b.to_csv("temp_course.csv",index=False)
 #type([])==list
