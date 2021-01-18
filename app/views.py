@@ -16,6 +16,7 @@ from flask_appbuilder._compat import as_unicode
 import logging
 from werkzeug.utils import secure_filename
 from .calculation import Calculator
+import re
 
 log = logging.getLogger(__name__)
 """
@@ -108,6 +109,7 @@ def getChoices():
             U.instructor['FirstN'] = ""
             U.instructor['SecondN'] = ""
             U.instructor['ThirdN'] = ""
+            U.instructor['MaxSec'] = ""
 
     if os.path.exists(os.path.join(app.config["UPLOAD_FOLDER"],app.config["SYSCONFIG"])):
         U.sysconfig = pd.read_csv(os.path.join(app.config["UPLOAD_FOLDER"],app.config["SYSCONFIG"]))
@@ -244,7 +246,7 @@ class CalculateFormView(SimpleFormView):
             return redirect(appbuilder.get_url_for_index)
         self.calculator = Calculator(U.instructor,U.course,U.sysconfig)
         self.calculator.calculate() 
-        costs,strategies = self.calculator.fetch_result2()
+        costs,strategies,index = self.calculator.fetch_result2()
         self.form_get(form,costs)
         widgets = self._get_edit_widget(form=form)
         self.update_redirect()
@@ -266,13 +268,14 @@ class CalculateFormView(SimpleFormView):
     def form_post(self,form):
         s = [form.Strategy.choices[i][0] for i in range(3)]
         s = s.index(form.Strategy.data)
-        _,strategies = self.calculator.fetch_result2()
-        term = self.calculator.config['Term']
+        _,strategies,index = self.calculator.fetch_result2()
+        TermX = self.calculator.config['Term']
+        term = "history" #
         U.instructor[term] = ""
         strategy = strategies.iloc[:,s]
-        print("-------------------------------------------------------------------------------------")
+        strategyX = strategies.iloc[:,[s]]
         for i in range(strategy.shape[0]):
-            c = strategy.index[i]
+            c = strategy.index[i].split(" {")[0]
             code = U.course[U.course.Course==c].Code.values[0]
             #print(c)
             teachers = strategy[i]
@@ -284,14 +287,18 @@ class CalculateFormView(SimpleFormView):
                 #print(c,t)
                 inst = t[0]
                 num = t[1].split(")")[0]
+                #if already exists
+                if code in U.instructor.loc[U.instructor.name==inst,term].values[0]:
+                    continue
                 U.lock.acquire()
                 if U.instructor.loc[U.instructor.name==inst,term].values[0]!="":
                     U.instructor.loc[U.instructor.name==inst,term] += "/"
-                U.instructor.loc[U.instructor.name==inst,term] += code+"("+num+")"
+                U.instructor.loc[U.instructor.name==inst,term] += code#+"("+num+")"
                 U.lock.release()
         #Save
         U.instructor.to_csv(os.path.join(app.config["UPLOAD_FOLDER"],app.config["INSTRUCTOR"]),index=False)
-        strategy.to_csv(os.path.join(app.config["UPLOAD_FOLDER"],"result.csv"),index=True)
+        strategy.to_csv(os.path.join(app.config["UPLOAD_FOLDER"],TermX+"_result.csv"),index=True)
+        strategyX.to_html(os.path.join(app.config["FILE_FOLDER"],TermX+"_result.html"),index=True)
         flash(as_unicode(self.message), "info")
 
 appbuilder.add_view(
@@ -303,6 +310,62 @@ appbuilder.add_view(
     category_label=_('Allocation'),
     category_icon='fa-list')
         #read result csv
+
+"""
+    Result
+"""
+class ResultView(BaseView):
+    default_view = "result"
+
+    @expose("/result/", methods=["GET"])
+    @has_access
+    def result(self):
+        user = g.user
+        email = user.email
+        #print(user.roles)
+        if email in U.instructor.email.values:
+            name = U.instructor[U.instructor.email==email].name.values[0]
+        else:
+            name = "Not Found"
+        sysconfig = U.sysconfig
+        TermX = str(int(sysconfig[sysconfig['config']=='Year'].iloc[0,1]))+"-"+str(int(sysconfig[sysconfig['config']=='Term'].iloc[0,1]))
+        if os.path.exists(os.path.join(app.config["FILE_FOLDER"],TermX+"_result.html")):
+            html = ""
+            with open(os.path.join(app.config["FILE_FOLDER"],TermX+"_result.html")) as f:
+                html = f.read()
+                html = re.sub(name,"<b>"+name+"</b>",html)
+                return self.render_template(
+                        "result.html", 
+                        appbuilder = self.appbuilder, 
+                        html = html
+                        )
+                #return self.render_template(
+                #        self.form_template,
+                #        title=self.form_title,
+                #        widgets=widgets,
+                #        appbuilder=self.appbuilder,
+                #        strategies = strategies.to_html()
+                #    )
+        else:
+            flash(as_unicode("The administrator has not generated the result. Please check it later."), "danger")
+            return redirect(appbuilder.get_url_for_index)
+
+appbuilder.add_view(
+    ResultView,
+    'ResultView',
+    label=_('Check Result'),
+    icon='fa-check-square-o',
+    category='Result',
+    category_label=_('Result'),
+    category_icon='fa-list')
+#appbuilder.add_link(
+#    href = "/Result",
+#    name = "Result",
+#    category='Result',
+#    category_label=_('Result'),
+#    category_icon='fa-table')
+        
+
 
 """
     Application wide 404 error handler

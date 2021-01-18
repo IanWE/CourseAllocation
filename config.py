@@ -115,6 +115,9 @@ FAB_ROLES = {
         ["FillupView", "can_this_form_get"],
         ["FillupView", "can_this_form_post"],
         ["Fillup","menu_access"],
+        ["Result","menu_access"],
+        ["ResultView","menu_access"],
+        ["ResultView","can_result"],
     ]
 }
 

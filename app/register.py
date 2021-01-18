@@ -58,6 +58,7 @@ class RegisterUserDBForm(DynamicForm):
 
 class MyRegisterUserDBView(BaseRegisterUser):
     form = RegisterUserDBForm
+    message = "Registered successfully"
     def add_registration(self, username, first_name, last_name ,email, password=""):
         from . import app
         register_user = self.appbuilder.sm.add_register_user(
@@ -98,14 +99,15 @@ class MyRegisterUserDBView(BaseRegisterUser):
         else:
             self.appbuilder.sm.del_register_user(reg)
             flash(as_unicode(self.message), "info")
-            print("XXXXXXXXXXXXXXXX"+self.message)
-            return self.render_template(
-                self.activation_template,
-                username=reg.username,
-                first_name=reg.first_name,
-                last_name=reg.last_name,
-                appbuilder=self.appbuilder,
-            )
+            #print("Registered successfully")
+            return redirect(self.appbuilder.get_url_for_index)
+            #return self.render_template(
+            #    self.activation_template,
+            #    username=reg.username,
+            #    first_name=reg.first_name,
+            #    last_name=reg.last_name,
+            #    appbuilder=self.appbuilder,
+            #)
 
     def form_get(self, form):
         self.add_form_unique_validations(form)

@@ -100,38 +100,7 @@ class Calculator():
                         continue
                     for k in correspond[b.Code[i]]:
                         self.W[k][j] += temp_f
-
-    def greedy2(self,W,t):
-        base = len(self.W)-len(W)
-        s = 0
-        trace = []
-        teachers = copy.deepcopy(t)
-        course_dict = copy.deepcopy(self.course_dict)
-        for i in range(len(W)):
-            temp = copy.deepcopy(W[i])#.copy()
-            for j in range(len(teachers)):
-                if teachers[j] > 3:
-                    temp[j] = temp[j]*(1+self.config[2]*(teachers[j]-3))
-                else:
-                    temp[j] = temp[j]*(1+self.config[1]*teachers[j])
-                if teachers[j] >= self.teacherMax[j]:
-                    temp[j] += 999
-            course_dict[self.course_list[i+base]] = course_dict.get(self.course_list[i+base],[])
-            index = temp.index(min(temp))
-            course_dict[self.course_list[i+base]].append(index)
-            teachers[index] += 1
-            s += temp[index]
-            trace.append(index)
-        for i in course_dict:
-            if len(course_dict[i])<=4:
-                s += 0
-            else:
-                n = len(course_dict[i])/4
-                for j in range(int(n)):
-                    s += self.config['addition']*(j+1)
-        #s += 
-        return s,trace
-
+    
     #Greedy algorithm for bound
     def greedy(self,W,t):
         base = len(self.W)-len(W)
@@ -151,7 +120,7 @@ class Calculator():
                 #Let a course be only assigned to one teacher
                 course_dict[self.course_list[i+base]] = course_dict.get(self.course_list[i+base],[])
                 cs = course_dict[self.course_list[i+base]]
-                l = len(set(cs))
+                l = len(cs)
                 if j not in cs:
                     l = l*self.config['addition']
                     temp[j] += l
@@ -170,7 +139,6 @@ class Calculator():
         def check(i,W,teachers):
             rest_W = W[i:]
             bound,_ = self.greedy(rest_W,teachers)
-            #bound,_ = self.greedy2(rest_W,teachers)
             return bound
         if round(self.cost,5) >= round(self.mincost,5):
             #print(str(i)+" "+str(cost))
@@ -178,21 +146,18 @@ class Calculator():
             return
         elif i >= len(self.W):
             print("Find a trace with cost:"+str(self.cost)+"   "+str(self.trace))
-            #mincost = self.mincost if len(self.best3cost)==0 else max(self.best3cost)
-            if round(self.cost,5) not in self.best3cost:
-                self.best3strategies.append(self.trace.copy())
-                self.best3cost.append(round(self.cost,5))
-                #if len(self.best3cost) > 3:
-                #    index = self.best3cost.index(max(self.best3cost))
-                #    del self.best3strategies[index]
-                #    del self.best3cost[index]
-            #if len(self.best3cost)>=3:
-            self.mincost = min(self.best3cost)
+            if len(self.best3cost) >= 3:
+                index = self.best3cost.index(max(self.best3cost))
+                del self.best3strategies[index]
+                del self.best3cost[index]
+            self.best3strategies.append(self.trace.copy())
+            self.best3cost.append(self.cost)
+            if len(self.best3cost)>=3:
+                self.mincost = max(self.best3cost)
         else:
             #prune
             bound = check(i,self.W,self.teachers)
             if round(self.cost+bound,5) >= round(self.mincost,5):
-                #if round(self.cost+bound,5) >= round((self.greedycost+self.mincost)/2+0.0001,5):
                 #print("Greedy Result:"+str(self.greedytrace))
                 #print("Result:"+str(self.trace))
                 print("Cost Bound:"+str(self.cost)+" "+str(bound)+" min cost:"+str(self.mincost)+" "+str(i)+"/"+str(len(self.W)))
@@ -216,7 +181,7 @@ class Calculator():
                     l = l*self.config['addition']
                     self.course_dict[self.course_list[i]].append(j)
                     appended = True
-                    #print(self.course_list[i],self.course_dict[self.course_list[i]])
+                    print(self.course_list[i],self.course_dict[self.course_list[i]])
                 penalty += l
                 self.teachers[j] += 1
                 if self.teachers[j] > int(self.teacherMax[j]):
@@ -234,7 +199,7 @@ class Calculator():
                 del self.trace[-1]
                 if appended==True:
                     del self.course_dict[self.course_list[i]][-1]
-                    #print(self.course_list[i],self.course_dict[self.course_list[i]])
+                    print(self.course_list[i],self.course_dict[self.course_list[i]])
                 #print("-:",self.course_dict)
                 #print("Penalty "+str(float(penalty))+" MinCost "+str(self.mincost))
                 #print(str(i)+" Cost3 "+str(float(self.cost)))
@@ -251,20 +216,14 @@ class Calculator():
         start=time.time()
         self.course_dict = dict()
         greedycost,self.greedytrace = self.greedy(self.W, self.teachers)
-        #self.greedycost = greedycost+0.001
-        #print("XXXXXXXXXXXXXXXXXXXXX "+str(greedycost)+" "+str(self.greedytrace))
-        #self.teachers[16] += 1
-        #self.course_dict[self.course_list[0]]=[16]
-        #cost1,trace1 = self.greedy(self.W[1:],self.teachers)
-        #print("XXXXXXXXXXXXXXXXXXXXX "+str(cost1)+" "+str(trace1))
-        self.mincost = greedycost + 0.00001
+        self.mincost = greedycost + 0.1
         self.dfs(0)
         for i in range(len(self.best3cost)):
             log.debug("Strategy "+str(i)+":"+str(self.best3cost[i]))
-            log.debug(self.best3strategies[i])
-            log.debug("Courses:")
-            for j in range(self.course.shape[0]):
-                log.debug(self.course.iloc[j,0]+":"+self.instructor.iloc[self.best3strategies[i][j],0])
+            #log.debug(self.best3strategies[i])
+            #log.debug("Courses:")
+            #for j in range(self.course.shape[0]):
+            #    log.debug(self.course.iloc[j,0]+":"+self.instructor.iloc[self.best3strategies[i][j],0])
         end=time.time()
         log.debug("The procession took "+str(end-start)+" seconds")
     
@@ -277,16 +236,6 @@ class Calculator():
         d["Strategy 2"] = []
         d["Strategy 3"] = []
         strategy = [dict(),dict(),dict()]
-        costs = np.array(self.best3cost)
-        ma = max(self.best3cost)
-        mi = min(self.best3cost)
-        mid = (ma+mi)/2
-        first = self.best3strategies[self.best3cost.index(mi)]
-        print(mid,np.where(costs>=mid)[0])
-        second = self.best3strategies[np.where(costs>mid)[0][0]]
-        third = self.best3strategies[self.best3cost.index(ma)]
-        self.best3strategies = [first,second,third]
-        self.best3cost = [mi,mid,ma]
         print(self.best3strategies)
         for j in range(len(self.W)):
             for k in range(3):
