@@ -298,7 +298,7 @@ class CalculateFormView(SimpleFormView):
                 workload["Allocation"].append(allocation)
             workload = pd.DataFrame(workload)
             workload.index = U.instructor.name
-            html += '<br><br><p tyle="text-align:center;font-size:20px;"><b>Strategy '+str(i)+':</b></p>'
+            html += '<br><br><p tyle="text-align:center;font-size:20px;"><b>Strategy '+str(i+1)+':</b></p>'
             html += workload.to_html()
             results.append(workload.to_html())
         return html
