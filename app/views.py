@@ -236,6 +236,73 @@ class CalculateFormView(SimpleFormView):
     form_title = _("Please choose the allocation strategy")
     form_template = "edit.html"
     message = "Saved successfully"
+
+    def to_html(self,strategies):
+        insts = dict()
+        for i in range(strategies.shape[0]):
+            course = strategies.index[i].split("{")[-1].split("}")[0]
+            if re.match("[A-Z]*[a-z]*\d+F",course) is not None:
+                continue
+            for j in range(strategies.shape[1]):
+                teachers = strategies.iloc[i,j]
+                ts = teachers.split("|")
+                newts = ""
+                for t in ts:
+                    tn = t.split("(")[0]
+                    newts += t
+                    if course not in U.instructor[U.instructor.name==tn].iloc[0,2:7].values:
+                        newts += " NP"
+                    if course not in U.instructor[U.instructor.name==tn]["history"].values[0]:
+                        newts += " NH"
+                    #if t.split("(")[0]=="Fiona Lee":
+                    #    print("XXXXXXXXXXXXX",U.instructor[U.instructor.name==t.split("(")[0]]["history"].values[0])
+                    newts += "|"
+                newts = newts[:-1]
+                strategies.iloc[i,j] = newts
+            num = int(t.split("(")[1].split(")")[0])
+        html = strategies.to_html()
+        html = html.replace("|","<br>")
+        html += '<p style="text-align:center;font-size:16px;">NP: not a preferred course &nbsp;&nbsp;&nbsp; NH: not a course taught before</p>'
+        html = html.replace("NP",'<font color="#A00000">NP</font>')
+        html = html.replace("NH",'<font color="#CC6600">NH</font>')
+
+        # Table 2
+        results = []
+        for i in range(3):
+            strategy = strategies.iloc[:,[i]]
+            insts = dict()
+            for j in range(strategy.shape[0]):
+                code = strategies.index[j].split("{")[1].split("}")[0]
+                teachers = strategy.iloc[j,0]
+                for t in teachers.split("|"):
+                    tn = t.split("(")[0]
+                    #print("XXXXXXXXXXXXXXXXXXXXXXXX",t+" "+teachers)
+                    #print("XXXXXXXXXXXXXXXX",t.split("(")[1].split(")"))
+                    n = int(t.split("(")[1].split(")")[0])
+                    insts[tn] = insts.get(tn,dict())
+                    insts[tn][code] = insts[tn].get(code,0) + n
+            workload = {'# of different courses':[],"# of sections":[],"Equivalent workload":[],"Allocation":[]}
+            for j in range(U.instructor.shape[0]):
+                name = U.instructor.name[j]
+                workload['# of different courses'].append(len(insts[name]))
+                secs = 0
+                w = 0
+                allocation = ""
+                for code in insts[name]:
+                    secs += insts[name][code]
+                    w += insts[name][code] * U.course[U.course.Code==code]['Ins/Sec'].values[0]
+                    allocation += code+"("+str(insts[name][code])+")"+"/"
+                allocation = allocation[:-1]
+                workload['# of sections'].append(secs)
+                workload["Equivalent workload"].append(w)
+                workload["Allocation"].append(allocation)
+            workload = pd.DataFrame(workload)
+            workload.index = U.instructor.name
+            html += '<br><br><p tyle="text-align:center;font-size:20px;"><b>Strategy '+str(i)+':</b></p>'
+            html += workload.to_html()
+            results.append(workload.to_html())
+        return html
+
     @expose("/form", methods=["GET"])
     @has_access
     def this_form_get(self):
@@ -250,13 +317,14 @@ class CalculateFormView(SimpleFormView):
         self.form_get(form,costs)
         widgets = self._get_edit_widget(form=form)
         self.update_redirect()
+        strategies = self.to_html(strategies)
         #print(self.form_template)
         return self.render_template(
             self.form_template,
             title=self.form_title,
             widgets=widgets,
             appbuilder=self.appbuilder,
-            strategies = strategies.to_html()
+            strategies = strategies#.to_html().replace("|","<br>")
         )
     def form_get(self,form,costs):
         #print(costs)

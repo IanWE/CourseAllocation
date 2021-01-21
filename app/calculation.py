@@ -60,7 +60,7 @@ class Calculator():
                     p = b['PreAllocation'][i]
                     l = p.split("/")#load all pre-setted courses
                     #print("XXXXXXXXXXXXXXXXXXXXXX"+b['Code'][i],p)
-                    self.preset[b['Code'][i]] = p
+                    self.preset[b['Code'][i]] = p.replace("/","|")
                     for p in l:
                         correspond[p.split("(")[0]] = correspond.get(p.split("(")[0],0) + int(p.split("(")[1].split(")")[0])#Course:number
                         #correspond[b['Code'][i]] = #Course:number
@@ -195,7 +195,7 @@ class Calculator():
                 #if round(self.cost+bound,5) >= round((self.greedycost+self.mincost)/2+0.0001,5):
                 #print("Greedy Result:"+str(self.greedytrace))
                 #print("Result:"+str(self.trace))
-                print("Cost Bound:"+str(self.cost)+" "+str(bound)+" min cost:"+str(self.mincost)+" "+str(i)+"/"+str(len(self.W)))
+                #print("Cost Bound:"+str(self.cost)+" "+str(bound)+" min cost:"+str(self.mincost)+" "+str(i)+"/"+str(len(self.W)))
                 return
             arg = np.array(self.W[i]).argsort()[::-1]
             #arg = range(len(self.W[0]))
@@ -302,12 +302,12 @@ class Calculator():
                 if j in strategy[i].keys():
                     for k in strategy[i][j]:
                         if flag!=1:
-                            s += "/"
+                            s += "|"
                         flag = 0
                         s += k+"("+str(strategy[i][j][k])+")"
                 elif j in self.preset:
                     if flag!=1:
-                        s += "/"
+                        s += "|"
                     s += self.preset[j] 
                 d["Strategy "+str(i+1)].append(s)
         index = self.course.Course+" {"+self.course.Code+"}"
