@@ -252,7 +252,7 @@ class CalculateFormView(SimpleFormView):
                     newts += t
                     if course not in U.instructor[U.instructor.name==tn].iloc[0,2:7].values:
                         newts += " NP"
-                    if course not in U.instructor[U.instructor.name==tn]["history"].values[0]:
+                    if "history" not in U.instructor.columns or course not in U.instructor[U.instructor.name==tn]["history"].values[0]:
                         newts += " NH"
                     #if t.split("(")[0]=="Fiona Lee":
                     #    print("XXXXXXXXXXXXX",U.instructor[U.instructor.name==t.split("(")[0]]["history"].values[0])
@@ -284,6 +284,12 @@ class CalculateFormView(SimpleFormView):
             workload = {'# of different courses':[],"# of sections":[],"Equivalent workload":[],"Allocation":[]}
             for j in range(U.instructor.shape[0]):
                 name = U.instructor.name[j]
+                if name not in insts:
+                    workload['# of different courses'].append(0)
+                    workload['# of sections'].append(0)
+                    workload["Equivalent workload"].append(0)
+                    workload["Allocation"].append("-")
+                    continue
                 workload['# of different courses'].append(len(insts[name]))
                 secs = 0
                 w = 0
@@ -313,7 +319,11 @@ class CalculateFormView(SimpleFormView):
             return redirect(appbuilder.get_url_for_index)
         self.calculator = Calculator(U.instructor,U.course,U.sysconfig)
         self.calculator.calculate() 
-        costs,strategies,index = self.calculator.fetch_result2()
+        try:
+            costs,strategies,index = self.calculator.fetch_result2()
+        except Exception as e:
+            flash(as_unicode("Error:Calulation Failed"), "danger")
+            return redirect(appbuilder.get_url_for_index)
         self.form_get(form,costs)
         widgets = self._get_edit_widget(form=form)
         self.update_redirect()
