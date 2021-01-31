@@ -1,9 +1,11 @@
 # CourseAllocation
 A system for course allocation
 
-## Environment Create
-Conda should be installed first
+# Install MiniConda
+`wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh`
+`./Miniconda3-latest-Linux-x86_64.sh`
 
+## Environment Create
 `conda env create -f environment.yml`
 
 ## Activate the environment
@@ -11,6 +13,8 @@ Conda should be installed first
 
 ## Create DB
 If you wanna reinitialize the app, you can delete the previous database, and create a new one by `flask fab create-db`
+
+If you wanna reset the dataset, delete the `app.db` directly, and create a new one.
 
 ## Start
 Use `python app.py` to start, and you can edit it by deleting `debug=True` to implement it officially.

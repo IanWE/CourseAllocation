@@ -1,10 +1,8 @@
-name : cl 
+name : cl_
 dependencies:
-- python
+- python=3.9.1
 - jupyter
-- pandas
+- pandas=1.1.5
 - pip:
-  - numpy
-  - requests
-  - pillow
+  - numpy==1.19.2
   - flask-appbuilder

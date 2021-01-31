@@ -10,9 +10,9 @@ Weight_for_courses_taught_in_the_past,0.1
 Weight_for_courses_never_taught,0.5
 Weight_for_additional_instructor_to_a_course,1.0
 Penalty_for_teaching_courses,0.2
-Penalty_for_teaching_multiple_courses,1.0
-Penalty_for_teaching_more_than_4_classes,4
-Penalty_for_teaching_more_than_MaxSec,400
-Penalty_for_teaching_less_than_MaxSec,1.0
+Penalty_for_teaching_multiple_courses,2.0
+Penalty_for_teaching_more_than_4_classes,40
+Penalty_for_teaching_more_than_MaxSec,40
+Penalty_for_teaching_less_than_MaxSec,4
 Year,2021
 Term,1

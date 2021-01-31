@@ -127,15 +127,16 @@ class Calculator():
                 else:
                     temp[j] = temp[j]*(1+self.config[1]*teachers[j])
                 teacher_dict[j] = teacher_dict.get(j,[])
-                if len(set(teacher_dict[j])) > 0:#A teacher should teach course as less as possible
+                #A teacher should teach course as less as possible
+                if len(set(teacher_dict[j])) > 0:
                     if self.course_list[i+base] in teacher_dict[j]:
-                        #temp[j] = temp[j]*(1+self.config[3]*(len(set(teacher_dict[j]))-1))
-                        temp[j] += self.config[3]*(len(set(teacher_dict[j]))-1)
+                        temp[j] += self.config[3]*(len(set(teacher_dict[j]))-1)**3
                     else:
-                        temp[j] += self.config[3]*len(set(teacher_dict[j]))
+                        temp[j] += self.config[3]*len(set(teacher_dict[j]))**3
+                #Teache target number of courses
                 if teachers[j] >= self.teacherMax[j]:
                     temp[j] += self.config["top"]
-                elif self.teacherMax[j]!=999:
+                elif self.teacherMax[j]!=10000:
                     temp[j] += self.config["bottom"]/(self.teacherMax[j]-teachers[j])
                 else:
                     temp[j] += self.config["bottom"]
@@ -178,7 +179,10 @@ class Calculator():
                 #    del self.best3strategies[index]
                 #    del self.best3cost[index]
             #if len(self.best3cost)>=3:
-            self.mincost = min(self.best3cost)
+            if  len(self.best3cost)<1000:
+                self.mincost = min(self.best3cost)
+            else:
+                self.mincost = sorted(self.best3cost)[int(len(self.best3cost)/4)]
         else:
             #prune
             bound = check(i,self.W,self.teachers)
@@ -194,33 +198,31 @@ class Calculator():
             for j in arg:
                 penalty = 0
                 if self.teachers[j] >= 4:
-                    #penalty = self.W[i][j]*self.config[2]*(self.teachers[j]-3)
                     penalty = self.W[i][j]*(1+self.config[2]*(self.teachers[j]-3))
                 else:
                     penalty = self.W[i][j]*(1+self.config[1]*self.teachers[j])
                 self.teacher_dict[j] = self.teacher_dict.get(j,[])
                 if len(set(self.teacher_dict[j])) > 0:#A teacher should teach course as less as possible
+                    #A teacher should teach less different courses
                     if self.course_list[i] in self.teacher_dict[j]:
-                        #penalty = penalty*(1+self.config[3]*(len(set(self.teacher_dict[j]))-1))
-                        penalty += self.config[3]*(len(set(self.teacher_dict[j]))-1)
+                        penalty += self.config[3]*(len(set(self.teacher_dict[j]))-1)**3
                     else:
-                        #penalty = penalty*(1+self.config[3]*len(set(self.teacher_dict[j])))
-                        penalty += self.config[3]*len(set(self.teacher_dict[j]))
+                        penalty += self.config[3]*len(set(self.teacher_dict[j]))**3
                 #Let a course be only assigned to one teacher
                 self.course_dict[self.course_list[i]] = self.course_dict.get(self.course_list[i],[])
                 cs = self.course_dict[self.course_list[i]]
                 self.teacher_dict[j].append(self.course_list[i])
                 appended = False
                 l = len(set(cs))
-                if j not in cs:#if j is not in course_dict, add it in and set a mark
+                #if j is not in course_dict, add it in and set a mark
+                if j not in cs:
                     l = l * self.config['addition']
                     self.course_dict[self.course_list[i]].append(j)
                     appended = True
-                    #print(self.course_list[i],self.course_dict[self.course_list[i]])
                     penalty += l
                 if self.teachers[j] >= int(self.teacherMax[j]):
                     penalty += self.config["top"]
-                elif self.teacherMax[j] != 999:
+                elif self.teacherMax[j] != 10000:
                     penalty += self.config["bottom"]/(self.teacherMax[j]-self.teachers[j])
                 else:
                     penalty += self.config["bottom"]
@@ -287,10 +289,12 @@ class Calculator():
         ma = max(self.best3cost)
         mi = min(self.best3cost)
         mid = (ma+mi)/2
+        ma = mid
+        mid = (ma+mi)/2
         first = self.best3strategies[self.best3cost.index(mi)]
         print(mid,np.where(costs>=mid)[0])
         second = self.best3strategies[np.where(costs>mid)[0][0]]
-        third = self.best3strategies[self.best3cost.index(ma)]
+        third = self.best3strategies[np.where(costs>mid)[0][0]]
         self.best3strategies = [first,second,third]
         self.best3cost = [mi,mid,ma]
         print(self.best3strategies)
