@@ -1,23 +1,23 @@
-,Strategy 1,Strategy 2,Strategy 3
-Programming Fundamentals I,Lee Kok Khing(2),Lee Kok Khing(2),Lee Kok Khing(2)
-Data Stuctructures and Algorithms,Lee Kok Khing(2),Lee Kok Khing(2),Lee Kok Khing(2)
-Mathematical Foundations for Computing,Pius Lee(2),Pius Lee(2),Pius Lee(2)
-Collaborative Software Development,Ong Hong Seng(1),Ong Hong Seng(1),Ong Hong Seng(1)
-Interconnection of Cyber-Physical Systems,Ong Hong Seng(1),Ong Hong Seng(1),Ong Hong Seng(1)
-Introduction to Artificial Intelligence,Ong Hong Seng(2),Ong Hong Seng(2),Ong Hong Seng(2)
-Introduction to Machine Learning,Chua Hong Ngoh(3),Chua Hong Ngoh(3),Chua Hong Ngoh(3)
-Internet of Things: Technology and Applications,Chua Hong Ngoh(1),Chua Hong Ngoh(1),Chua Hong Ngoh(1)
-Introduction to Programming,Lum Eng Kit(5)/Lee Kok Khing(1)/Ong Hong Seng(1)/Fiona Lee(4)/Mok Heng Ngee(1),Lum Eng Kit(5)/Lee Kok Khing(1)/Ong Hong Seng(1)/Fiona Lee(4)/Mok Heng Ngee(1),Lum Eng Kit(5)/Lee Kok Khing(1)/Ong Hong Seng(1)/Fiona Lee(4)/Mok Heng Ngee(1)
-Introduction to Programming (as faculty),Joelle Elmaleh(1)/Michelle Kan(1),Joelle Elmaleh(1)/Michelle Kan(1),Joelle Elmaleh(1)/Michelle Kan(1)
-Buisness Process Analysis & Solutioning,Ramachandra Rao Vandana(5)/Chua Hong Ngoh(1)/Thiang Lay Foo(3)/Joelle Elmaleh(1),Ramachandra Rao Vandana(5)/Chua Hong Ngoh(1)/Thiang Lay Foo(3)/Joelle Elmaleh(1),Ramachandra Rao Vandana(5)/Chua Hong Ngoh(1)/Thiang Lay Foo(3)/Joelle Elmaleh(1)
-Software Project Management,Coen Chua(1),Coen Chua(1),Coen Chua(1)
-Digital Busness: Technology & Transformation,Coen Chua(1),Coen Chua(1),Coen Chua(1)
-Web Application Development II,Coen Chua(1)/Meenakshi Gopalakrishnan(3)/Michelle Kan(1)/Wendy Tan(2)/Koh Kwan Chin(1),Coen Chua(1)/Meenakshi Gopalakrishnan(3)/Michelle Kan(1)/Wendy Tan(2)/Koh Kwan Chin(1),Coen Chua(1)/Meenakshi Gopalakrishnan(3)/Michelle Kan(1)/Wendy Tan(2)/Koh Kwan Chin(1)
-Analytics Foundation,Koh Kwan Chin(2),Koh Kwan Chin(2),Koh Kwan Chin(2)
-Interactive Design & Prototyping,Fiona Lee(1)/Thiang Lay Foo(2)/Joelle Elmaleh(2)/Coen Chua(2)/Meenakshi Gopalakrishnan(1)/Michelle Kan(1)/Wendy Tan(1)/Koh Kwan Chin(1)/Lau Yi Meng(3),Fiona Lee(1)/Thiang Lay Foo(2)/Joelle Elmaleh(2)/Coen Chua(2)/Meenakshi Gopalakrishnan(1)/Michelle Kan(1)/Wendy Tan(1)/Koh Kwan Chin(1)/Lau Yi Meng(3),Fiona Lee(1)/Thiang Lay Foo(2)/Joelle Elmaleh(2)/Coen Chua(2)/Meenakshi Gopalakrishnan(1)/Michelle Kan(1)/Wendy Tan(1)/Koh Kwan Chin(1)/Lau Yi Meng(3)
-Enterprise Business Solution (as faculty),Wendy Tan(1),Wendy Tan(1),Wendy Tan(1)
-Object Oriented Programming,Lau Yi Meng(1),Lau Yi Meng(1),Lau Yi Meng(1)
-Managing Customer Relations with Analytics: Asian Insights,Swetha GOTTPATI(1),Swetha GOTTPATI(1),Swetha GOTTPATI(1)
-Computational Thinking,Meenakshi Gopalakrishnan(1)/Swetha GOTTPATI(3)/Pius Lee(2),Meenakshi Gopalakrishnan(1)/Swetha GOTTPATI(3)/Pius Lee(2),Meenakshi Gopalakrishnan(1)/Swetha GOTTPATI(3)/Pius Lee(2)
-Computational Thinking (as faculty),Mok Heng Ngee(2),Mok Heng Ngee(2),Mok Heng Ngee(2)
-Internet of Things: Technology and Applications,Tan Pang Jin(1),Indu Sandya(1),Joseph Sung(1)
+Course,Code,Act,Ins/Sec,PreAllocation
+Internet of Things: Technology and Applications,IS614,1,1.0,
+Managing Customer Relations with Analytics: Asian Insights,IS446,1,1.0,
+Object Oriented Programming,IS442,1,1.0,
+Collaborative Software Development,CS203,1,1.0,
+Interconnection of Cyber-Physical Systems,CS204,1,1.0,
+Enterprise Business Solution (as faculty),IS412F,1,1.0,Lum Eng Kit(1)
+Internet of Things: Technology and Applications,CS462,1,1.0,
+Digital Busness: Technology & Transformation,IS215,1,1.0,
+Software Project Management,IS212,1,1.0,
+Analytics Foundation,IS217,2,1.0,
+Programming Fundamentals I,CS101,2,1.0,
+Introduction to Programming (as faculty),IS111F,2,1.0,Joelle Elmaleh(1)/Michelle Kan(1)
+Introduction to Artificial Intelligence,CS420,2,1.0,
+Mathematical Foundations for Computing,CS104,2,1.0,
+Data Stuctructures and Algorithms,CS201,2,1.0,
+Computational Thinking (as faculty),IS1702F,2,1.0,Mok Heng Ngee(2)
+Introduction to Machine Learning,CS421,3,1.0,
+Computational Thinking,IS1702,6,0.5,
+Web Application Development II,IS216,8,1.0,
+Buisness Process Analysis & Solutioning,IS210,10,1.0,
+Introduction to Programming,IS111,12,1.0,
+Interactive Design & Prototyping,IS211,14,1.0,

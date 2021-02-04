@@ -88,12 +88,16 @@ appbuilder.add_view(
     category_label=_('Setting'),
     category_icon='fa-wrench')
 
-
 #Submit form
 def getChoices():
     name = app.config["COURSE"]
     if os.path.exists(os.path.join(app.config["UPLOAD_FOLDER"],name)):
+        #Load and sort
         course = pd.read_csv(os.path.join(app.config["UPLOAD_FOLDER"],name))
+        course.sort_values("Act",inplace=True,ascending=False)
+        course.to_csv(os.path.join(app.config["UPLOAD_FOLDER"],name),index=False)
+        course = pd.read_csv(os.path.join(app.config["UPLOAD_FOLDER"],name))
+
         choices = course.iloc[:,1].tolist()
         choices = [(i,choices[i]) for i in range(len(choices))]
         U.course = course
@@ -417,13 +421,6 @@ class ResultView(BaseView):
                         appbuilder = self.appbuilder, 
                         html = html
                         )
-                #return self.render_template(
-                #        self.form_template,
-                #        title=self.form_title,
-                #        widgets=widgets,
-                #        appbuilder=self.appbuilder,
-                #        strategies = strategies.to_html()
-                #    )
         else:
             flash(as_unicode("The administrator has not generated the result. Please check it later."), "danger")
             return redirect(appbuilder.get_url_for_index)
@@ -436,14 +433,36 @@ appbuilder.add_view(
     category='Result',
     category_label=_('Result'),
     category_icon='fa-list')
-#appbuilder.add_link(
-#    href = "/Result",
-#    name = "Result",
-#    category='Result',
-#    category_label=_('Result'),
-#    category_icon='fa-table')
         
 
+"""
+   Overview 
+"""
+class OverviewView(BaseView):
+    default_view = "overview"
+    @expose("/overview/", methods=["GET"])
+    @has_access
+    def overview(self):
+        if len(U.course)>0:
+            html = U.course[['Course','Code','Act','Ins/Sec']].sort_values("Code").to_html(index=False)
+            return self.render_template(
+                    "overview.html", 
+                    appbuilder = self.appbuilder, 
+                    html = html
+                    )
+        else:
+            flash(as_unicode("The administrator has not uploaded the course infomation. Please check it later."), "danger")
+            return redirect(appbuilder.get_url_for_index)
+
+appbuilder.add_view(
+    OverviewView,
+    'OverviewView',
+    label=_('Course Overview'),
+    #icon='fa-align-justify',
+    icon='fa-list',
+    category='Overview',
+    category_label=_('Course Overview'),
+    category_icon='fa-list')
 
 """
     Application wide 404 error handler

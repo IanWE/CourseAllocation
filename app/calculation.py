@@ -30,10 +30,13 @@ class Calculator():
         self.config["history"] = sysconfig[sysconfig['config']=='Weight_for_courses_taught_in_the_past'].iloc[0,1]
         self.config['never'] = sysconfig[sysconfig['config']=='Weight_for_courses_never_taught'].iloc[0,1]
         self.config['addition'] = sysconfig[sysconfig['config']=='Weight_for_additional_instructor_to_a_course'].iloc[0,1]
+        #self.config['Enhanced'] = sysconfig[sysconfig['config']=='Enhanced_search'].iloc[0,1]
 
-        self.config[1] = sysconfig[sysconfig['config']=='Penalty_for_teaching_courses'].iloc[0,1]
-        self.config[2] = sysconfig[sysconfig['config']=='Penalty_for_teaching_more_than_4_classes'].iloc[0,1]
-        self.config[3] = sysconfig[sysconfig['config']=='Penalty_for_teaching_multiple_courses'].iloc[0,1]
+        self.config[1] = sysconfig[sysconfig['config']=='Penalty_for_teaching_classes'].iloc[0,1]
+        self.config[2] = sysconfig[sysconfig['config']=='Penalty_for_teaching_second_different_course'].iloc[0,1]
+        self.config[3] = sysconfig[sysconfig['config']=='Penalty_for_teaching_third_different_course'].iloc[0,1]
+        self.config[4] = sysconfig[sysconfig['config']=='Penalty_for_teaching_more_than_four_different_course'].iloc[0,1]
+
         self.config["top"] = sysconfig[sysconfig['config']=='Penalty_for_teaching_more_than_MaxSec'].iloc[0,1]
         self.config["bottom"] = sysconfig[sysconfig['config']=='Penalty_for_teaching_less_than_MaxSec'].iloc[0,1]
 
@@ -43,74 +46,74 @@ class Calculator():
 
     #preference weight * # of sections * workload - weight of history + penalty of multiple courses
     def weight_init(self):
-        a = self.instructor
-        b = self.course
-        config = self.config
-        #base = b['Ins/Sec']*b['Act']*self.config['N']
-        #base = base.values
+        a = self.instructor#instructor csv
+        b = self.course#course csv
+        config = self.config# config file
         correspond = {}
-        self.pre_teacher_dict = dict()
-        self.course_list = []
+        self.pre_teacher_num = dict()
+        self.pre_teacher_dict = dict()#pre-allocated courses, teacher:courses
+        self.course_list = []#course list, index of W: course
         index = 0
-        self.preset = dict()
+        self.preset = dict() #course:teachers
         for i in range(b.shape[0]):
-            for j in range(int(b['Act'][i])):#split courses
-                if type(b['PreAllocation'][i]) is not str:
+            if type(b['PreAllocation'][i]) is not str:
+                for j in range(int(b['Act'][i])):#split courses
+                    #Course:Index
                     correspond[b['Code'][i]] = correspond.get(b['Code'][i],[])#Code:[1,2,3]
                     correspond[b['Code'][i]].append(len(self.W))
                     self.W.append([b['Ins/Sec'][i]]*a.shape[0])
                     self.course_list.append(b['Code'][i])
-                elif "(" in b['PreAllocation'][i]:
-                    p = b['PreAllocation'][i]
-                    l = p.split("/")#load all pre-setted courses
-                    #print("XXXXXXXXXXXXXXXXXXXXXX"+b['Code'][i],p)
-                    self.preset[b['Code'][i]] = p.replace("/","|")
-                    for p in l:
-                        correspond[p.split("(")[0]] = correspond.get(p.split("(")[0],0) + int(p.split("(")[1].split(")")[0])#Course:number
-                        if b['Code'][i][-1]=="F":
-                            code = b['Code'][i][:-1]
-                        else:
-                            code = b['Code'][i]
-                        self.pre_teacher_dict[p.split("(")[0]] = self.pre_teacher_dict.get(p.split("(")[0],[])
-                        self.pre_teacher_dict[p.split("(")[0]].append(code)
-                    #correspond[b['Code'][i]] = #Course:number
+            elif "(" in b['PreAllocation'][i]:
+                #load all pre-setted courses
+                p = b['PreAllocation'][i]
+                l = p.split("/")
+                self.preset[b['Code'][i]] = p.replace("/","|")
+                for p in l:
+                    self.pre_teacher_num[p.split("(")[0]] = correspond.get(p.split("(")[0],0) 
+                    self.pre_teacher_num[p.split("(")[0]] += int(p.split("(")[1].split(")")[0])#Instructor:Number
+                    #Get the code without last "F", and store it in pre_teacher_dict
+                    if b['Code'][i][-1]=="F":
+                        code = b['Code'][i][:-1]
+                    else:
+                        code = b['Code'][i]
+                    self.pre_teacher_dict[p.split("(")[0]] = self.pre_teacher_dict.get(p.split("(")[0],[])
+                    self.pre_teacher_dict[p.split("(")[0]].append(code)
+                    print("Preset:")
+                    print(p,self.pre_teacher_dict[p.split("(")[0]])
         self.correspond = correspond
         for j in range(self.instructor.shape[0]):
             for k in range(2,10):
                 code = a.iloc[j,k]
                 c = a.columns[k]
-                #If code is null
+                #If no preference was chosen
                 if code not in b['Code'].values:
                     continue
                 for i in correspond[code]:
-                    #print("!!!"+str(self.W[i][j])+" "+str(config[c]))
                     self.W[i][j] *= config[c]
-                    #print("!!!"+str(self.W[i][j]))
+            #Get the target number of classes the instructor need to teach
             maxsec = a.iloc[j,10]
             if not pd.isna(maxsec):
                 self.teacherMax[j] = maxsec
-                print("Teacher:",self.instructor.name[j])
+                #print("Teacher:",self.instructor.name[j])
             else:
-                self.teacherMax[j] = 10000
+                self.teacherMax[j] = 4
             #previous-taught classes
             if a.shape[1]>11:
                 familiarity = dict()
-                #for k in range(10,a.shape[1]):
-                #code = a.iloc[j,k]#code1/code2/code3...
                 code = a.loc[j,'history']#code1/code2/code3...
                 if pd.isna(code):
                     continue
                 familiarity = config['history']
                 for i in range(b.shape[0]):
                     temp_f = config['never']
-                    if not pd.isna(code) and b.Code[i] in code:#if course is in the keys
+                    #if course is in the keys
+                    if not pd.isna(code) and b.Code[i] in code:
                         temp_f = min(temp_f,familiarity)
                     #print(correspond)
                     if b.Code[i] in self.preset or b.Act[i]==0:
                         continue
                     for k in correspond[b.Code[i]]:
                         self.W[k][j] += temp_f
-
     #Greedy algorithm for bound
     def greedy(self,W,t):
         base = len(self.W)-len(W)
@@ -120,139 +123,120 @@ class Calculator():
         course_dict = copy.deepcopy(self.course_dict)
         teacher_dict = copy.deepcopy(self.teacher_dict)
         for i in range(len(W)):
-            temp = copy.deepcopy(W[i])#.copy()
+            temp = copy.deepcopy(W[i])
             for j in range(len(teachers)):
-                if teachers[j] >= 4:
-                    temp[j] = temp[j]*(1+self.config[2]*(teachers[j]-3))
-                else:
-                    temp[j] = temp[j]*(1+self.config[1]*teachers[j])
+                #Add Penalty
+                temp[j] = temp[j]*(1+self.config[1]*teachers[j])
+                #temp[j] += self.config[1]*teachers[j]
                 teacher_dict[j] = teacher_dict.get(j,[])
-                #A teacher should teach course as less as possible
+                #A teacher should teach different courses as few as possible
                 if len(set(teacher_dict[j])) > 0:
-                    if self.course_list[i+base] in teacher_dict[j]:
-                        temp[j] += self.config[3]*(len(set(teacher_dict[j]))-1)**3
-                    else:
-                        temp[j] += self.config[3]*len(set(teacher_dict[j]))**3
-                #Teache target number of courses
+                    if self.course_list[i+base] not in teacher_dict[j]:
+                        if len(set(teacher_dict[j]))+1<4:
+                            temp[j] += self.config[len(set(teacher_dict[j]))+1]#add penalty of teaching different courses
+                        else:#more than 4 classes
+                            temp[j] += self.config[4]
+                #Teachers should teach target number of classes
                 if teachers[j] >= self.teacherMax[j]:
                     temp[j] += self.config["top"]
-                elif self.teacherMax[j]!=10000:
-                    temp[j] += self.config["bottom"]/(self.teacherMax[j]-teachers[j])
                 else:
-                    temp[j] += self.config["bottom"]
+                    temp[j] += self.config["bottom"]/(self.teacherMax[j]-teachers[j])
                 #Let a course be only assigned to one teacher
-                course_dict[self.course_list[i+base]] = course_dict.get(self.course_list[i+base],[])
+                course_dict[self.course_list[i+base]] = course_dict.get(self.course_list[i+base],[])#course:teachers
                 cs = course_dict[self.course_list[i+base]]
                 l = len(set(cs))
-                if j not in cs:
+                if j not in cs:# if teacher j didnt teaches this course
                     l = l*self.config['addition']
                     temp[j] += l
-            index = temp.index(min(temp))
+            #print("Chose:",str(temp.index(min(temp)))+":"+str(min(temp)))
+            #print(str(temp))
+            index = temp.index(min(temp))#get the teacher with the lowest penalty to teach this course
             course_dict[self.course_list[i+base]].append(index)
             teacher_dict[index].append(self.course_list[i+base])
             teachers[index] += 1
             s += temp[index]
             trace.append(index)
-            #print("Min:"+str(s)+"|"+str(temp[index])+"|"+str(index))
-            #print("Course:",self.course_list[i])
-            #print(temp)
-            #print(W[i])
         return s,trace
-    
+
     def dfs(self,i=0):
         def check(i,W,teachers):
             rest_W = W[i:]
             bound,_ = self.greedy(rest_W,teachers)
             return bound
         if round(self.cost,5) >= round(self.mincost,5):
-            #print(str(i)+" "+str(cost))
             #print("Ignore:"+str(self.mincost)+"   "+str(self.trace)+" "+str(self.best3cost))
             return
         elif i >= len(self.W):
             print("Find a trace with cost:"+str(self.cost)+"   "+str(self.trace))
-            #mincost = self.mincost if len(self.best3cost)==0 else max(self.best3cost)
+            #If the trace is not in the strategy list
             if round(self.cost,5) not in self.best3cost:
                 self.best3strategies.append(self.trace.copy())
                 self.best3cost.append(round(self.cost,5))
-                #if len(self.best3cost) > 3:
-                #    index = self.best3cost.index(max(self.best3cost))
-                #    del self.best3strategies[index]
-                #    del self.best3cost[index]
-            #if len(self.best3cost)>=3:
-            if  len(self.best3cost)<1000:
-                self.mincost = min(self.best3cost)
-            else:
-                self.mincost = sorted(self.best3cost)[int(len(self.best3cost)/4)]
+            #if self.config['Enhanced']==0:
+            #    self.mincost = min(self.best3cost)
+            #else:
+            #    self.mincost = sorted(self.best3cost)[int(len(self.best3cost)*0.5)]
+            self.mincost = sorted(self.best3cost)[int(len(self.best3cost)*0.5)]
         else:
             #prune
             bound = check(i,self.W,self.teachers)
-            if round(self.cost+bound,5) >= round(self.mincost,5):
-                #if round(self.cost+bound,5) >= round((self.greedycost+self.mincost)/2+0.0001,5):
-                #print("Greedy Result:"+str(self.greedytrace))
-                #print("Result:"+str(self.trace))
+            #If the predicted cost large than mincost, or the cost already exists
+            if round(self.cost+bound,5) >= round(self.mincost,5) or round(self.cost+bound,5) in self.best3cost:
                 #print("Cost Bound:"+str(self.cost)+" "+str(bound)+" min cost:"+str(self.mincost)+" "+str(i)+"/"+str(len(self.W)))
-                #print(self.teachers,self.teacher_dict)
                 return
-            arg = np.array(self.W[i]).argsort()[::-1]
-            #arg = range(len(self.W[0]))
+            arg = np.array(self.W[i]).argsort()[::]
+            #arg = range(len(self.W[i]))
+            #arg = np.array(self.r(i,self.W,self.teachers)).argsort()[::]
             for j in arg:
-                penalty = 0
-                if self.teachers[j] >= 4:
-                    penalty = self.W[i][j]*(1+self.config[2]*(self.teachers[j]-3))
-                else:
-                    penalty = self.W[i][j]*(1+self.config[1]*self.teachers[j])
+                penalty = self.W[i][j]*(1+self.config[1]*self.teachers[j])
                 self.teacher_dict[j] = self.teacher_dict.get(j,[])
-                if len(set(self.teacher_dict[j])) > 0:#A teacher should teach course as less as possible
-                    #A teacher should teach less different courses
-                    if self.course_list[i] in self.teacher_dict[j]:
-                        penalty += self.config[3]*(len(set(self.teacher_dict[j]))-1)**3
-                    else:
-                        penalty += self.config[3]*len(set(self.teacher_dict[j]))**3
+                #A teacher should teach less different courses
+                if len(set(self.teacher_dict[j])) > 0:
+                    if self.course_list[i] not in self.teacher_dict[j]:
+                        if len(set(self.teacher_dict[j]))+1<4:
+                            penalty += self.config[len(set(self.teacher_dict[j]))+1]
+                        else:#more than 4 classes
+                            penalty += self.config[4]
                 #Let a course be only assigned to one teacher
                 self.course_dict[self.course_list[i]] = self.course_dict.get(self.course_list[i],[])
                 cs = self.course_dict[self.course_list[i]]
                 self.teacher_dict[j].append(self.course_list[i])
                 appended = False
                 l = len(set(cs))
-                #if j is not in course_dict, add it in and set a mark
+                #if j is not in course_dict, add it and set a flag
                 if j not in cs:
                     l = l * self.config['addition']
                     self.course_dict[self.course_list[i]].append(j)
                     appended = True
                     penalty += l
+                #Teachers should teach the target number of courses
                 if self.teachers[j] >= int(self.teacherMax[j]):
                     penalty += self.config["top"]
-                elif self.teacherMax[j] != 10000:
-                    penalty += self.config["bottom"]/(self.teacherMax[j]-self.teachers[j])
                 else:
-                    penalty += self.config["bottom"]
+                    penalty += self.config["bottom"]/(self.teacherMax[j]-self.teachers[j])
                 self.teachers[j] += 1
-                #print(str(i)+" Cost1 "+str(float(self.cost)))
-                #self.cost += self.W[i][j]
                 self.cost += penalty
-                #print(str(i)+" Cost2 "+str(float(self.cost)))
                 self.trace.append(j)
+                #print(i)
+                #print(self.trace)
                 self.dfs(i+1)
                 #traceback
                 self.teachers[j] -= 1
                 self.cost -= penalty
-                #self.cost -= self.W[i][j]
                 del self.trace[-1]
                 del self.teacher_dict[j][-1]
                 if appended==True:
                     del self.course_dict[self.course_list[i]][-1]
-                    #print(self.course_list[i],self.course_dict[self.course_list[i]])
-                #print("-:",self.course_dict)
-                #print("Penalty "+str(float(penalty))+" MinCost "+str(self.mincost))
-                #print(str(i)+" Cost3 "+str(float(self.cost)))
     def calculate(self):
         #print(self.W)
         self.teachers = [0]*self.instructor.shape[0]
         self.teacher_dict = dict()
-        for i in self.correspond:
-            if i in self.instructor.name.values:
-                self.teachers[self.instructor.name.values.tolist().index(i)] = self.correspond[i]
-                self.teacher_dict[self.instructor.name.values.tolist().index(i)] = copy.deepcopy(self.pre_teacher_dict[i])
+        for i in self.pre_teacher_num:
+            self.teachers[self.instructor.name.values.tolist().index(i)] = self.pre_teacher_num[i]
+            self.teacher_dict[self.instructor.name.values.tolist().index(i)] = copy.deepcopy(self.pre_teacher_dict[i])
+            #print(i,self.teachers[self.instructor.name.values.tolist().index(i)])
+            #print(self.instructor.name.values.tolist().index(i),self.teacher_dict[self.instructor.name.values.tolist().index(i)])
+        print(self.instructor.name.values.tolist())
         self.trace = []
         self.cost = 0
         self.best3strategies = []
@@ -260,12 +244,9 @@ class Calculator():
         start=time.time()
         self.course_dict = dict()
         greedycost,self.greedytrace = self.greedy(self.W, self.teachers)
-        #print("XXXXXXXXXXXXXXXXXXXXX "+str(greedycost)+" "+str(self.greedytrace))
-        #self.teachers[16] += 1
-        #self.course_dict[self.course_list[0]]=[16]
-        #cost1,trace1 = self.greedy(self.W[1:],self.teachers)
-        #print("XXXXXXXXXXXXXXXXXXXXX "+str(cost1)+" "+str(trace1))
-        self.mincost = greedycost + 0.00001
+        #self.mincost = greedycost + 0.0001
+        self.mincost = greedycost * 1.5
+        print(self.mincost)
         self.dfs(0)
         for i in range(len(self.best3cost)):
             log.debug("Strategy "+str(i)+":"+str(self.best3cost[i]))
@@ -286,15 +267,17 @@ class Calculator():
         d["Strategy 3"] = []
         strategy = [dict(),dict(),dict()]
         costs = np.array(self.best3cost)
+        #Try to find another two diversified strategies
         ma = max(self.best3cost)
         mi = min(self.best3cost)
         mid = (ma+mi)/2
-        ma = mid
-        mid = (ma+mi)/2
+        for i in range(5):
+            ma = mid
+            mid = (ma+mi)/2
         first = self.best3strategies[self.best3cost.index(mi)]
         print(mid,np.where(costs>=mid)[0])
         second = self.best3strategies[np.where(costs>mid)[0][0]]
-        third = self.best3strategies[np.where(costs>mid)[0][0]]
+        third = self.best3strategies[np.where(costs>ma)[0][0]]
         self.best3strategies = [first,second,third]
         self.best3cost = [mi,mid,ma]
         print(self.best3strategies)
@@ -321,6 +304,6 @@ class Calculator():
                     s += self.preset[j] 
                 d["Strategy "+str(i+1)].append(s)
         index = self.course.Course+" {"+self.course.Code+"}"
-        df = pd.DataFrame(d,index=index)
+        df = pd.DataFrame(d,index=index).sort_index()
         return self.best3cost,df,index
 

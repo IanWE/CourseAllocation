@@ -118,6 +118,9 @@ FAB_ROLES = {
         ["Result","menu_access"],
         ["ResultView","menu_access"],
         ["ResultView","can_result"],
+        ["Overview","menu_access"],
+        ["OverviewView","menu_access"],
+        ["OverviewView","can_overview"],
     ]
 }
 
