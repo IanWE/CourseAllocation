@@ -18,7 +18,7 @@ If you wanna reinitialize the app, you can delete the previous database, and cre
 If you wanna reset the dataset, delete the `app.db` directly, and create a new one.
 
 ## Start
-Use `python app.py` to start, and you can edit it by deleting `debug=True` to implement it officially.
+Use `python run.py` to start, and you can edit it by deleting `debug=True` to implement it officially.
 
 # Setting
 In `config.py`, you can change some setting, like the admin user and style of the system.
