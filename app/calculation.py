@@ -253,6 +253,7 @@ class Calculator():
         self.beststrategies = []
         self.bestteacherlists = []
         self.bestcost = []
+        self.filtered = False
         start=time.time()
         self.course_dict = dict()
         greedycost,self.greedytrace = self.greedy(self.W, self.teachers)
@@ -272,23 +273,25 @@ class Calculator():
         return self.bestcost,self.beststrategies
 
     def fetch_result3(self):
-        unavailable_strategy = []
-        for i in range(len(self.bestteacherlists)):
-            strategy = self.bestteacherlists[i]
-            for workload in strategy:
-                if workload < int(self.avg):
-                    unavailable_strategy.append(i)
-                    break
         temp_costs = []
         temp_strategies = []
-        for i in range(len(self.beststrategies)):
-            if i in unavailable_strategy:
-                continue
-            temp_costs.append(self.bestcost[i])
-            temp_strategies.append(self.beststrategies[i])
-        print(temp_costs,self.avg)
-        self.bestcost = temp_costs
-        self.beststrategies = temp_strategies
+        if self.filtered==False:
+            unavailable_strategy = []
+            for i in range(len(self.bestteacherlists)):
+                strategy = self.bestteacherlists[i]
+                for j,workload in enumerate(strategy):
+                    if workload < self.teacherMax[j] and workload < int(self.avg):
+                        unavailable_strategy.append(i)
+                        break
+            for i in range(len(self.beststrategies)):
+                if i in unavailable_strategy:
+                    continue
+                temp_costs.append(self.bestcost[i])
+                temp_strategies.append(self.beststrategies[i])
+            self.filtered = True
+            print(temp_costs,self.avg)
+            self.bestcost = temp_costs
+            self.beststrategies = temp_strategies
         d = dict()
         d["Strategy 1"] = []
         d["Strategy 2"] = []
