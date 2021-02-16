@@ -1,21 +1,21 @@
 name,email,FirstP,SecondP,ThirdP,FourthP,FifthP,FirstN,SecondN,ThirdN,MaxSec,history
-Lee Kok Khing,kklee@smu.edu.sg,,,,,,,,,4.0,IS446/IS1702
-Ong Hong Seng,hsong@smu.edu.sg,,,,,,,,,,CS101/CS201
-Mok Heng Ngee,hnmok@smu.edu.sg,,,,,,,,,,IS1702F
-Chua Hong Ngoh,hnchua@smu.edu.sg,,,,,,,,,,CS204/IS111
-Lum Eng Kit,eklum@smu.edu.sg,,,,,,,,,,IS111
-Fiona Lee,fionalee@smu.edu.sg,,,,,,,,,3.0,IS111
-Ramachandra Rao Vandana,vandanarr@smu.edu.sg,,,,,,,,,,IS210
-Thiang Lay Foo,lfthiang@smu.edu.sg,,,,,,,,,,IS210
-Joelle Elmaleh,joellee@smu.edu.sg,,,,,,,,,,IS111/IS111F
-Coen Chua,coenchua@smu.edu.sg,,,,,,,,,,IS210/IS212/IS215
-Meenakshi Gopalakrishnan,meenakshig@smu.edu.sg,,,,,,,,,,IS216
-Michelle Kan,michellekan@smu.edu.sg,,,,,,,,,,IS111F/IS217
-Wendy Tan,wendytanlc@smu.edu.sg,,,,,,,,,,IS211/IS412F
-Koh Kwan Chin,kckoh@smu.edu.sg,,,,,,,,,,IS216
-Lau Yi Meng,ymlau@smu.edu.sg,,,,,,,,,,IS211
-Swetha GOTTPATI,sgottipati@smu.edu.sg,,,,,,,,,,IS211
-Pius Lee,piuslee@smu.edu.sg,,,,0.0,,,,,,IS211/CS462
-Tan Pang Jin,pjtan@smu.edu.sg,,,,,,,,,,IS442/IS1702
-Indu Sandya,indusandya@smu.edu.sg,,,,,,,,,,CS203/CS421
-Joseph Sung,josephsung@smu.edu.sg,,,,,,,,,,CS104/CS420/CS462
+Lee Kok Khing,kklee@smu.edu.sg,,,,,,,,,4,IS211
+Ong Hong Seng,hsong@smu.edu.sg,,,,,,,,,4,IS216
+Chua Hong Ngoh,hnchua@smu.edu.sg,,,,,,,,,4,IS210/CS462
+Lum Eng Kit,eklum@smu.edu.sg,,,,,,,,,4,IS412F/CS420
+Fiona Lee,fionalee@smu.edu.sg,,,,,,,,,4,IS211/IS442
+Ramachandra Rao Vandana,vandanarr@smu.edu.sg,,,,,,,,,4,CS101/IS212
+Thiang Lay Foo,lfthiang@smu.edu.sg,,,,,,,,,4,CS203/IS1702
+Joelle Elmaleh,joellee@smu.edu.sg,,,,,,,,,4,IS210/IS111F
+Coen Chua,coenchua@smu.edu.sg,,,,,,,,,4,IS111
+Meenakshi Gopalakrishnan,meenakshig@smu.edu.sg,,,,,,,,,4,IS210
+Michelle Kan,michellekan@smu.edu.sg,,,,,,,,,4,IS111F/CS104
+Wendy Tan,wendytanlc@smu.edu.sg,,,,,,,,,4,IS216
+Koh Kwan Chin,kckoh@smu.edu.sg,,,,,,,,,4,IS217/CS204
+Lau Yi Meng,ymlau@smu.edu.sg,,,,,,,,,4,IS111
+Swetha GOTTPATI,sgottipati@smu.edu.sg,,,,,,,,,4,IS111
+Pius Lee,piuslee@smu.edu.sg,,,,0.0,,,,,4,IS211
+Tan Pang Jin,pjtan@smu.edu.sg,,,,,,,,,4,CS421/IS446
+Indu Sandya,indusandya@smu.edu.sg,,,,,,,,,4,IS211
+Joseph Sung,josephsung@smu.edu.sg,,,,,,,,,4,CS201/IS215
+Mok Heng Ngee,hnmok@smu.edu.sg,,,,,,,,,4,IS1702F/CS462

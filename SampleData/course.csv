@@ -1,23 +1,23 @@
 Course,Code,Act,Ins/Sec,PreAllocation
+Interactive Design & Prototyping,IS211,14,1.0,
+Introduction to Programming,IS111,12,1.0,
+Buisness Process Analysis & Solutioning,IS210,10,1.0,
+Web Application Development II,IS216,8,1.0,
+Computational Thinking,IS1702,6,0.5,
+Introduction to Machine Learning,CS421,3,1.0,
+Analytics Foundation,IS217,2,1.0,
 Programming Fundamentals I,CS101,2,1.0,
 Data Stuctructures and Algorithms,CS201,2,1.0,
-Mathematical Foundations for Computing,CS104,2,1.0,
-Collaborative Software Development,CS203,1,1.0,
-Interconnection of Cyber-Physical Systems,CS204,1,1.0,
 Introduction to Artificial Intelligence,CS420,2,1.0,
-Introduction to Machine Learning,CS421,3,1.0,
-Internet of Things: Technology and Applications,CS462,1,1.0,
-Introduction to Programming,IS111,12,1.0,
 Introduction to Programming (as faculty),IS111F,2,1.0,Joelle Elmaleh(1)/Michelle Kan(1)
-Buisness Process Analysis & Solutioning,IS210,10,1.0,
+Mathematical Foundations for Computing,CS104,2,1.0,
+Computational Thinking (as faculty),IS1702F,2,1.0,Mok Heng Ngee(2)
+Managing Customer Relations with Analytics: Asian Insights,IS446,1,1.0,
 Software Project Management,IS212,1,1.0,
 Digital Busness: Technology & Transformation,IS215,1,1.0,
-Web Application Development II,IS216,8,1.0,
-Analytics Foundation,IS217,2,1.0,
-Interactive Design & Prototyping,IS211,14,1.0,
-Enterprise Business Solution (as faculty),IS412F,1,1.0,Wendy Tan(1)
+Internet of Things: Technology and Applications,CS462,1,1.0,
+Enterprise Business Solution (as faculty),IS412F,1,1.0,Lum Eng Kit(1)
+Interconnection of Cyber-Physical Systems,CS204,1,1.0,
+Collaborative Software Development,CS203,1,1.0,
 Object Oriented Programming,IS442,1,1.0,
-Managing Customer Relations with Analytics: Asian Insights,IS446,1,1.0,
-Computational Thinking,IS1702,6,0.5,
-Computational Thinking (as faculty),IS1702F,2,1.0,Mok Heng Ngee(2)
-Internet of Things: Technology and Applications,IS614,1,1.0
+Internet of Things: Technology and Applications,IS614,1,1.0,

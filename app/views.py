@@ -42,6 +42,27 @@ class UploadView(SimpleFormView):
     form = UploadForm
     form_title = _('Upload CSVs of settings')
     message = "Uploaded Successfully"
+
+    @expose("/form", methods=["POST"])
+    @has_access
+    def this_form_post(self):
+        self._init_vars()
+        form = self.form.refresh()
+        if form.validate_on_submit():
+            response = self.form_post(form)
+            if not response:
+                #return redirect(self.get_redirect())
+                return redirect(appbuilder.get_url_for_index)
+            return response
+        else:
+            widgets = self._get_edit_widget(form=form)
+            return self.render_template(
+                self.form_template,
+                title=self.form_title,
+                widgets=widgets,
+                appbuilder=self.appbuilder,
+            )
+
     def form_get(self,form):#prefill
         csv_names = [app.config["INSTRUCTOR"],app.config["COURSE"],app.config["SYSCONFIG"]]
         f = os.path.join(app.config['UPLOAD_FOLDER'], csv_names[0])
@@ -240,7 +261,6 @@ class CalculateFormView(SimpleFormView):
     form_title = _("Please choose the allocation strategy")
     form_template = "edit.html"
     message = "Saved successfully"
-
     def to_html(self,strategies):
         insts = dict()
         for i in range(strategies.shape[0]):
@@ -256,10 +276,8 @@ class CalculateFormView(SimpleFormView):
                     newts += t
                     if course not in U.instructor[U.instructor.name==tn].iloc[0,2:7].values:
                         newts += " NP"
-                    if "history" not in U.instructor.columns or course not in U.instructor[U.instructor.name==tn]["history"].values[0]:
+                    if "history" not in U.instructor.columns or (type(U.instructor[U.instructor.name==tn]["history"].values[0]) is not str) or (course not in U.instructor[U.instructor.name==tn]["history"].values[0]):
                         newts += " NH"
-                    #if t.split("(")[0]=="Fiona Lee":
-                    #    print("XXXXXXXXXXXXX",U.instructor[U.instructor.name==t.split("(")[0]]["history"].values[0])
                     newts += "|"
                 newts = newts[:-1]
                 strategies.iloc[i,j] = newts
@@ -280,8 +298,6 @@ class CalculateFormView(SimpleFormView):
                 teachers = strategy.iloc[j,0]
                 for t in teachers.split("|"):
                     tn = t.split("(")[0]
-                    #print("XXXXXXXXXXXXXXXXXXXXXXXX",t+" "+teachers)
-                    #print("XXXXXXXXXXXXXXXX",t.split("(")[1].split(")"))
                     n = int(t.split("(")[1].split(")")[0])
                     insts[tn] = insts.get(tn,dict())
                     insts[tn][code] = insts[tn].get(code,0) + n
@@ -323,11 +339,12 @@ class CalculateFormView(SimpleFormView):
             return redirect(appbuilder.get_url_for_index)
         self.calculator = Calculator(U.instructor,U.course,U.sysconfig)
         self.calculator.calculate() 
-        try:
-            costs,strategies,index = self.calculator.fetch_result2()
-        except Exception as e:
-            flash(as_unicode("Error:Calulation Failed"), "danger")
-            return redirect(appbuilder.get_url_for_index)
+        #try:
+        #    costs,strategies,index = self.calculator.fetch_result3()
+        #except Exception as e:
+        #    flash(as_unicode("Error:Calulation Failed"), "danger")
+        #    return redirect(appbuilder.get_url_for_index)
+        costs,strategies,index = self.calculator.fetch_result3()
         self.form_get(form,costs)
         widgets = self._get_edit_widget(form=form)
         self.update_redirect()
@@ -350,7 +367,7 @@ class CalculateFormView(SimpleFormView):
     def form_post(self,form):
         s = [form.Strategy.choices[i][0] for i in range(3)]
         s = s.index(form.Strategy.data)
-        _,strategies,index = self.calculator.fetch_result2()
+        _,strategies,index = self.calculator.fetch_result3()
         TermX = self.calculator.config['Term']
         term = "history" #
         U.instructor[term] = ""
@@ -363,10 +380,9 @@ class CalculateFormView(SimpleFormView):
             teachers = strategy[i]
             if type(teachers) is not str or teachers=="":
                 continue
-            teachers = teachers.split("/")
+            teachers = teachers.split("|")
             for t in teachers:
                 t=t.split("(")
-                #print(c,t)
                 inst = t[0]
                 num = t[1].split(")")[0]
                 #if already exists
@@ -390,7 +406,7 @@ appbuilder.add_view(
     icon='fa-check-square-o',
     category='Allocation',
     category_label=_('Allocation'),
-    category_icon='fa-list')
+    category_icon='fa-search')
         #read result csv
 
 """
@@ -432,7 +448,7 @@ appbuilder.add_view(
     icon='fa-check-square-o',
     category='Result',
     category_label=_('Result'),
-    category_icon='fa-list')
+    category_icon='fa-columns')
         
 
 """
