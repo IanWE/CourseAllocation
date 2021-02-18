@@ -97,9 +97,10 @@ class Calculator():
             for k in range(2,10):
                 code = a.iloc[j,k]
                 c = a.columns[k]
-                #If no preference was chosen
+                # If the code is not in the available course list
                 if code not in b['Code'].values:
                     continue
+                # If the course is the preference
                 for i in correspond[code]:
                     self.W[i][j] *= config[c]
             #Get the target number of classes the instructor need to teach

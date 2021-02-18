@@ -97,7 +97,7 @@ class UploadView(SimpleFormView):
                 csv_file.save(f)
                 flag = 1
         if flag==1:
-            app.config["SETTING_RENEWED"] = True
+            app.config['SETTING_RENEWED'] = True #mark for calculation
             getChoices()
             flash(as_unicode(self.message), "info")
 
@@ -127,7 +127,9 @@ def getChoices():
         U.course = course
         U.choices = choices
     if os.path.exists(os.path.join(app.config["UPLOAD_FOLDER"],app.config["INSTRUCTOR"])):
+        U.lock.acquire()
         U.instructor = pd.read_csv(os.path.join(app.config["UPLOAD_FOLDER"],app.config["INSTRUCTOR"]))
+        U.lock.release()
         if U.instructor.shape[1]==2:
             U.instructor['FirstP'] = ""
             U.instructor['SecondP'] = ""
@@ -195,6 +197,7 @@ class FillupView(SimpleFormView):
         for i in columns:
             U.lock.acquire()
             U.instructor.loc[index,i] = form.listoffield[i].data
+            app.config['SETTING_RENEWED'] = True #mark for calculation
             U.lock.release()
             log.debug(user.email+":"+i+"-"+form.listoffield[i].data)
         U.instructor.to_csv(os.path.join(app.config["UPLOAD_FOLDER"],app.config["INSTRUCTOR"]),index=False)
@@ -341,7 +344,9 @@ class CalculateFormView(SimpleFormView):
         CalculateFormView.calculator = Calculator(U.instructor,U.course,U.sysconfig)
         CalculateFormView.calculator.calculate()
         app.config['CALCULATING'] = False
+        U.lock.acquire()
         app.config['SETTING_RENEWED'] = False
+        U.lock.release()
         return redirect(url_for(self.__class__.__name__+'.this_form_get'))
 
     @expose("/view",methods=["GET"])

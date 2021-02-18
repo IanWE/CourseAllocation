@@ -4,7 +4,7 @@ import numpy as np
 
 #b=pd.read_csv("app/static/uploads/course.csv")
 #a=pd.read_csv("app/static/uploads/instructor.csv")
-b=pd.read_csv("course.csv")
+b=pd.read_csv("coursewith0section.csv")
 a=pd.read_csv("instructor.csv")
 
 for i in range(a.shape[0]):
