@@ -5,16 +5,21 @@ import time
 import random
 import logging
 import copy
+from . import app
 
 log = logging.getLogger(__name__)
 class Calculator():
     def __init__(self,instructor,course,sysconfig):
         self.instructor = instructor
-        self.course = course
+        self.course = course[course['Act']>0] #ignore course with 0 action
         self.sysconfig = sysconfig
         self.W = []
         self.config = dict()
         self.teacherMax = dict()
+        self.bestcost = []
+        self.filtered = False
+        self.beststrategies = []
+        self.bestteacherlists = []
         self.bestcost = []
 
         self.config['FirstP'] = sysconfig[sysconfig['config']=='Weight_for_meeting_first_preference'].iloc[0,1]
@@ -49,6 +54,7 @@ class Calculator():
     def weight_init(self):
         a = self.instructor#instructor csv
         b = self.course#course csv
+        #b = b[b['Act']>0] 
         temp = b['Act']*b['Ins/Sec']
         self.avg = temp.sum()/temp.shape[0]
         config = self.config# config file
@@ -241,6 +247,7 @@ class Calculator():
                     del self.course_dict[self.course_list[i]][-1]
 
     def calculate(self):
+        app.config['CALCULATING'] = True
         #print(self.W)
         self.teachers = [0]*self.instructor.shape[0]
         self.teacher_dict = dict()

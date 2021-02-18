@@ -107,3 +107,8 @@ class FillupForm(DynamicForm):
 class CalculatorForm(DynamicForm):
     Strategy = RadioField('Strategy', choices=[('s1', 'Strategy 1'), ('s2', 'Strategy 2'), ('s3', 'Strategy 3')],        
             description=_("Plan"))
+
+class CalculatorViewForm(DynamicForm):
+    Strategy = RadioField('', 
+            choices=[('s', 'Start Calculation')],
+            description=_("No Running Thread"))

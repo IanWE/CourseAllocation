@@ -1,0 +1,41 @@
+{% extends "appbuilder/base.html" %}
+
+{% block content %}
+<div class="main">
+    <br>
+    <br>
+    <br>
+    <h1 style="text-align:center" >It's calculating for the best strategies </h1>　
+    <br>
+    <br>
+    <h4 style="text-align:center" >  Please wait patiently for few minutes. </h4>
+    <h4 style="text-align:center" >  We will redirect to the result page after the calculation finished.</h4>
+    <br>
+    <div id="app" style="text-align:center" >
+	<img src="/static/images/loading.gif" style="width: 80px; margin: 10px;">
+    </div>
+    <br>
+</div>
+
+<script src="/static/js/jquery-2.2.0.js"></script>
+<script type=text/javascript>
+    var result="{{ result | safe }}"
+    var data={
+        "result":result,
+    }
+    $.ajax({
+        type: 'GET',
+        url: /loading/,
+	data: data,
+        async: true,
+	cache: false,
+        success: function(data){
+	    if(data==result){
+                window.location.href='/calculateformview/form';
+	    }
+    	}
+    });
+</script>
+
+{% endblock %}
+

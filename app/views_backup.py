@@ -10,7 +10,6 @@ from . import utils as U
 from .models import Instructor
 from flask_babel import lazy_gettext as _
 from flask_appbuilder.security.decorators import has_access, has_access_api, permission_name
-from concurrent.futures import ThreadPoolExecutor
 from .form import *
 from flask_appbuilder.baseviews import BaseCRUDView, BaseFormView, BaseView, expose, expose_api
 from flask_appbuilder._compat import as_unicode
@@ -20,7 +19,6 @@ from .calculation import Calculator
 import re
 
 log = logging.getLogger(__name__)
-executor = ThreadPoolExecutor(10)
 """
    Page to submit user's intention
 """
@@ -97,7 +95,6 @@ class UploadView(SimpleFormView):
                 csv_file.save(f)
                 flag = 1
         if flag==1:
-            app.config["SETTING_RENEWED"] = True
             getChoices()
             flash(as_unicode(self.message), "info")
 
@@ -148,6 +145,7 @@ class FillupView(SimpleFormView):
     form_title = _('Please complete the following options')
     message = "Submitted Successfully"
     user_info = ""
+
     @expose("/form", methods=["GET"])
     @has_access
     def this_form_get(self):
@@ -262,11 +260,7 @@ class CalculateFormView(SimpleFormView):
     form = CalculatorForm
     form_title = _("Please choose the allocation strategy")
     form_template = "edit.html"
-    view_template = "loading.html"
     message = "Saved successfully"
-    calculator = Calculator(U.instructor,U.course,U.sysconfig)
-    default_view = "form_view"
-
     def to_html(self,strategies):
         insts = dict()
         for i in range(strategies.shape[0]):
@@ -280,7 +274,6 @@ class CalculateFormView(SimpleFormView):
                 for t in ts:
                     tn = t.split("(")[0]
                     newts += t
-                    #If the course is not tn's preference.
                     if course not in U.instructor[U.instructor.name==tn].iloc[0,2:7].values:
                         newts += " NP"
                     if "history" not in U.instructor.columns or (type(U.instructor[U.instructor.name==tn]["history"].values[0]) is not str) or (course not in U.instructor[U.instructor.name==tn]["history"].values[0]):
@@ -336,47 +329,22 @@ class CalculateFormView(SimpleFormView):
             results.append(workload.to_html())
         return html
 
-    def calculate(self):
-        app.config['CALCULATING'] = True
-        CalculateFormView.calculator = Calculator(U.instructor,U.course,U.sysconfig)
-        CalculateFormView.calculator.calculate()
-        app.config['CALCULATING'] = False
-        app.config['SETTING_RENEWED'] = False
-        return redirect(url_for(self.__class__.__name__+'.this_form_get'))
-
-    @expose("/view",methods=["GET"])
-    @has_access
-    def form_view(self):
-        self._init_vars()
-        if len(U.course)==0 or len(U.sysconfig)==0 or len(U.instructor)==0:
-            flash(as_unicode(self.error_message), "danger")
-            return redirect(appbuilder.get_url_for_index)
-        #if os.path.exists(os.path.join(app.config["FILE_FOLDER"],app.config["result"])):
-        if app.config["SETTING_RENEWED"] == True:
-            if app.config['CALCULATING'] == False:
-                try:
-                    executor.submit(self.calculate)
-                except Exception as e:
-                    flash(as_unicode("Error:Calulation Failed"), "danger")
-                    log.debug(e)
-            return self.render_template(
-                        self.view_template,
-                        appbuilder = self.appbuilder,
-                        result="Success"
-                    )
-        else:
-            return redirect(url_for(self.__class__.__name__+'.this_form_get'))
-
     @expose("/form", methods=["GET"])
+    @has_access
     def this_form_get(self):
         self._init_vars()
         form = self.form.refresh()
-        #costs,strategies,index = CalculateFormView.calculator.fetch_result3()
-        try:
-            costs,strategies,index = CalculateFormView.calculator.fetch_result3()
-        except Exception as e:
-            flash(as_unicode("Error: Fetch result failed"), "danger")
+        if len(U.course)==0 or len(U.sysconfig)==0 or len(U.instructor)==0:
+            flash(as_unicode(self.error_message), "danger")
             return redirect(appbuilder.get_url_for_index)
+        self.calculator = Calculator(U.instructor,U.course,U.sysconfig)
+        self.calculator.calculate() 
+        #try:
+        #    costs,strategies,index = self.calculator.fetch_result3()
+        #except Exception as e:
+        #    flash(as_unicode("Error:Calulation Failed"), "danger")
+        #    return redirect(appbuilder.get_url_for_index)
+        costs,strategies,index = self.calculator.fetch_result3()
         self.form_get(form,costs)
         widgets = self._get_edit_widget(form=form)
         self.update_redirect()
@@ -389,7 +357,6 @@ class CalculateFormView(SimpleFormView):
             appbuilder=self.appbuilder,
             strategies = strategies#.to_html().replace("|","<br>")
         )
-
     def form_get(self,form,costs):
         #print(costs)
         Strategy = ""
@@ -400,7 +367,7 @@ class CalculateFormView(SimpleFormView):
     def form_post(self,form):
         s = [form.Strategy.choices[i][0] for i in range(3)]
         s = s.index(form.Strategy.data)
-        _,strategies,index = CalculateFormView.calculator.fetch_result3()
+        _,strategies,index = self.calculator.fetch_result3()
         TermX = self.calculator.config['Term']
         term = "history" #
         U.instructor[term] = ""
@@ -442,15 +409,6 @@ appbuilder.add_view(
     category_icon='fa-search')
         #read result csv
 
-@app.route('/loading/',methods=['GET'])
-def loading():
-    flag = 0
-    while 1:
-        if app.config["SETTING_RENEWED"] == False and app.config['CALCULATING'] == False:
-            return "Success"
-        time.sleep(1)
-
-
 """
     Result
 """
@@ -491,6 +449,7 @@ appbuilder.add_view(
     category='Result',
     category_label=_('Result'),
     category_icon='fa-columns')
+        
 
 """
    Overview 
@@ -503,7 +462,7 @@ class OverviewView(BaseView):
         if len(U.course)>0:
             html = U.course[['Course','Code','Act','Ins/Sec']]
             html = html[html['Act']>0]
-            html = html.sort_values("Code").to_html(index=False)
+            html.sort_values("Code").to_html(index=False)
             return self.render_template(
                     "overview.html", 
                     appbuilder = self.appbuilder, 

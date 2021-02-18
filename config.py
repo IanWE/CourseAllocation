@@ -109,6 +109,10 @@ AUTH_USER_REGISTRATION_ROLE = 'Public'
 RECAPTCHA_PUBLIC_KEY = 'GOOGLE PUBLIC KEY FOR RECAPTCHA'
 RECAPTCHA_PRIVATE_KEY = 'GOOGLE PRIVATE KEY FOR RECAPTCHA'
 
+# Do Not Change Them
+SETTING_RENEWED = True
+CALCULATING = False
+
 #Role control
 FAB_ROLES = {
     "Public": [#"can this form get on FillupView, can this form post on FillupView, menu access on Fillup"
