@@ -560,14 +560,14 @@ class ResultView(BaseView):
             flash(as_unicode("The administrator has not generated the result. Please check it later."), "danger")
             return redirect(appbuilder.get_url_for_index)
 
-appbuilder.add_view(
-    ResultView,
-    'ResultView',
-    label=_('Check Result'),
-    icon='fa-check-square-o',
-    category='Result',
-    category_label=_('Result'),
-    category_icon='fa-columns')
+#appbuilder.add_view(
+#    ResultView,
+#    'ResultView',
+#    label=_('Check Result'),
+#    icon='fa-check-square-o',
+#    category='Result',
+#    category_label=_('Result'),
+#    category_icon='fa-columns')
 
 """
    Overview 
