@@ -119,12 +119,14 @@ FAB_ROLES = {
         ["FillupView", "can_this_form_get"],
         ["FillupView", "can_this_form_post"],
         ["Fillup","menu_access"],
-        ["Result","menu_access"],
-        ["ResultView","menu_access"],
-        ["ResultView","can_result"],
         ["Overview","menu_access"],
         ["OverviewView","menu_access"],
         ["OverviewView","can_overview"],
+        ["Allocation","menu_access"],
+        ["Allocate","menu_access"],
+        ["CalculateFormView","can_this_form_get"],
+        ["CalculateFormView","can_this_form_post"],
+        ["CalculateFormView","can_form_view"]
     ]
 }
 

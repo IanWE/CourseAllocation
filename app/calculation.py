@@ -48,6 +48,7 @@ class Calculator():
 
         self.config['Term'] = str(int(sysconfig[sysconfig['config']=='Year'].iloc[0,1]))+"-"+str(int(sysconfig[sysconfig['config']=='Term'].iloc[0,1]))
         self.config['Year'] = sysconfig[sysconfig['config']=='Year'].iloc[0,1]
+        self.config['Intensity'] = sysconfig[sysconfig['config']=="Calculation_intensity"].iloc[0,1]
         self.weight_init()
 
     #preference weight * # of sections * workload - weight of history + penalty of multiple courses
@@ -196,7 +197,7 @@ class Calculator():
                 self.bestcost.append(round(self.cost,5))
                 self.bestteacherlists.append(self.teachers.copy())
                 print(self.bestteacherlists[-1])
-            self.mincost = sorted(self.bestcost)[int(len(self.bestcost)*0.5)]
+            self.mincost = sorted(self.bestcost)[int(len(self.bestcost)*self.config['Intensity'])]
             #self.mincost = sorted(self.bestcost)[0]
         else:
             #prune

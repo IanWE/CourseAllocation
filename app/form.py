@@ -54,6 +54,7 @@ class FillupForm(DynamicForm):
         description=_(
             'Select your second preference of course to teach or leave it None.'),
         choices=U.choices,
+        validators=[],
         widget=Select2Widget()
         )
     ThirdP = SelectField(
@@ -61,6 +62,7 @@ class FillupForm(DynamicForm):
         description=_(
             'Select your third preference of course to teach or leave it None.'),
         choices=U.choices,
+        validators=[],
         widget=Select2Widget()
         )
     FourthP = SelectField(
@@ -68,6 +70,7 @@ class FillupForm(DynamicForm):
         description=_(
             'Select your fourth preference of course to teach or leave it None.'),
         choices=U.choices,
+        validators=[],
         widget=Select2Widget()
         )
     FifthP = SelectField(
@@ -75,6 +78,7 @@ class FillupForm(DynamicForm):
         description=_(
             'Select your fifth preference of course to teach or leave it None.'),
         choices=U.choices,
+        validators=[],
         widget=Select2Widget()
         )
     FirstN = SelectField(
@@ -89,6 +93,7 @@ class FillupForm(DynamicForm):
         description=_(
             'Please choose your second unwanted course or leave it None'),
         choices=U.choices,
+        validators=[],
         widget=Select2Widget()
         )
     ThirdN = SelectField(
@@ -96,6 +101,7 @@ class FillupForm(DynamicForm):
         description=_(
             'Please choose your third unwanted course teach or leave it None'),
         choices=U.choices,
+        validators=[],
         widget=Select2Widget()
         )
     listoffield = dict()
@@ -109,6 +115,4 @@ class CalculatorForm(DynamicForm):
             description=_("Plan"))
 
 class CalculatorViewForm(DynamicForm):
-    Strategy = RadioField('', 
-            choices=[('s', 'Start Calculation')],
-            description=_("No Running Thread"))
+    pass

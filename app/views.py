@@ -17,6 +17,7 @@ from flask_appbuilder._compat import as_unicode
 import logging
 from werkzeug.utils import secure_filename
 from .calculation import Calculator
+from wtforms.validators import ValidationError
 import re
 
 log = logging.getLogger(__name__)
@@ -101,8 +102,6 @@ class UploadView(SimpleFormView):
             getChoices()
             flash(as_unicode(self.message), "info")
 
-
-#appbuilder.add_view_no_menu(UploadView)
 appbuilder.add_view(
     UploadView,
     'Upload CSVs to initialize the system',
@@ -144,12 +143,20 @@ def getChoices():
     if os.path.exists(os.path.join(app.config["UPLOAD_FOLDER"],app.config["SYSCONFIG"])):
         U.sysconfig = pd.read_csv(os.path.join(app.config["UPLOAD_FOLDER"],app.config["SYSCONFIG"]))
 
+def seq_sel(pre_choice,s):
+    def _seq_sel(form,field):
+        #print("XXXXXXXXXXXXXXXXXXXXXX2 "+field.data+"  "+pre_choice.data)
+        if field.data!='0' and pre_choice.data=='0':
+            raise ValidationError('Please complete previous "'+s+'" options before selecting this.')
+    return _seq_sel
 
 class FillupView(SimpleFormView):
     form = FillupForm
-    form_title = _('Please complete the following options')
+    form_title = _('Please complete the following options.  (Your preference input will only be visible to RO and not visible to other instructors.)')
     message = "Submitted Successfully"
     user_info = ""
+    columns = U.instructor.columns[2:10]
+
     @expose("/form", methods=["GET"])
     @has_access
     def this_form_get(self):
@@ -173,28 +180,57 @@ class FillupView(SimpleFormView):
     def form_get(self,form):
         user = g.user
         log.debug(user.email)
-        #log.debug(U.instructor)
         user_info = U.instructor[U.instructor.email==user.email]
         courses = U.course
         log.debug(user_info)
         if user_info.shape[0]<=0:
             return True
-        columns = user_info.columns[2:10]
         prechoice = user_info.iloc[0,2:10]
-        #pd.isna(prechoice[0])
-        for j,i in enumerate(columns):
+        for j,i in enumerate(self.columns):
             if not pd.isna(prechoice[j]) and prechoice[j] in courses['Code'].values:
+                form.listoffield[i].data = user_info.iloc[0,:][i]
                 form.listoffield[i].description = "You have chose "+prechoice[j]+"."
+
+    @expose("/form", methods=["POST"])
+    @has_access
+    def this_form_post(self):
+        self._init_vars()
+        if app.config['CALCULATING'] == True:
+            flash(as_unicode("Allocation routine running in progress. Please submit your form a couple of minutes later."), "danger")
+            form = self.form.refresh()
+            widgets = self._get_edit_widget(form=form)
+            return self.render_template(
+                self.form_template,
+                title=self.form_title,
+                widgets=widgets,
+                appbuilder=self.appbuilder,
+            )
+        elif app.config['CALCULATING'] == False:
+            form = self.form.refresh()
+            for i,j in enumerate(self.columns):
+                if (i>0 and i<5) or i>5:
+                    s = "Preference" if i<5 else "Unwanted Course"
+                    form.listoffield[j].validators = [seq_sel(form.listoffield[self.columns[i-1]], s)]
+            if form.validate_on_submit():
+                response = self.form_post(form)
+                if not response:
+                    #return redirect(self.get_redirect())
+                    return redirect(appbuilder.get_url_for_index)
+                return response
+            else:
+                widgets = self._get_edit_widget(form=form)
+                return self.render_template(
+                    self.form_template,
+                    title=self.form_title,
+                    widgets=widgets,
+                    appbuilder=self.appbuilder,
+                )
 
     def form_post(self,form):
         user = g.user
         user_info = U.instructor[U.instructor.email==user.email]#read the index
-        #if user_info.shape[0]<=0:#if user is not in the list
-        #    flash(as_unicode("You are not in the list of valid users."), "danger")
-        #    return redirect(appbuilder.get_url_for_index)    
         index = user_info.index[0]
-        columns = U.instructor.columns[2:10]
-        for i in columns:
+        for i in self.columns:
             U.lock.acquire()
             U.instructor.loc[index,i] = form.listoffield[i].data
             app.config['SETTING_RENEWED'] = True #mark for calculation
@@ -263,8 +299,10 @@ appbuilder.add_view(
 class CalculateFormView(SimpleFormView):
     error_message = "Please upload the CSVs to initialize the system"
     form = CalculatorForm
+    #formv = CalculatorViewForm
     form_title = _("Please choose the allocation strategy")
     form_template = "edit.html"
+    vform_template = "instructor_strategy_page.html"
     view_template = "loading.html"
     message = "Saved successfully"
     calculator = Calculator(U.instructor,U.course,U.sysconfig)
@@ -343,9 +381,9 @@ class CalculateFormView(SimpleFormView):
         app.config['CALCULATING'] = True
         CalculateFormView.calculator = Calculator(U.instructor,U.course,U.sysconfig)
         CalculateFormView.calculator.calculate()
-        app.config['CALCULATING'] = False
         U.lock.acquire()
         app.config['SETTING_RENEWED'] = False
+        app.config['CALCULATING'] = False
         U.lock.release()
         return redirect(url_for(self.__class__.__name__+'.this_form_get'))
 
@@ -375,18 +413,28 @@ class CalculateFormView(SimpleFormView):
     @expose("/form", methods=["GET"])
     def this_form_get(self):
         self._init_vars()
-        form = self.form.refresh()
         #costs,strategies,index = CalculateFormView.calculator.fetch_result3()
         try:
             costs,strategies,index = CalculateFormView.calculator.fetch_result3()
         except Exception as e:
-            flash(as_unicode("Error: Fetch result failed"), "danger")
+            flash(as_unicode("Error: Fetch result failed. Please retry it"), "danger")
             return redirect(appbuilder.get_url_for_index)
+        form = self.form.refresh()
         self.form_get(form,costs)
         widgets = self._get_edit_widget(form=form)
         self.update_redirect()
         strategies = self.to_html(strategies)
-        #print(self.form_template)
+        #For other instructor, show a page without button
+        user = g.user
+        email = user.email
+        if email!=app.config['ADMIN']:
+            return self.render_template(
+                self.vform_template,
+                title="Allocation Strategies(approximate)",
+                widgets=widgets,
+                appbuilder=self.appbuilder,
+                strategies = strategies#.to_html().replace("|","<br>")
+            )
         return self.render_template(
             self.form_template,
             title=self.form_title,
@@ -401,6 +449,31 @@ class CalculateFormView(SimpleFormView):
         for i in range(len(costs)):
             Strategy += "Cost of Strategy "+str(i+1)+": "+str(costs[i])+" | "
         form.Strategy.description = Strategy
+
+    @expose("/form", methods=["POST"])
+    @has_access
+    def this_form_post(self):
+        self._init_vars()
+        #For other instructor, show a page without button
+        user = g.user
+        email = user.email
+        if email!=app.config['ADMIN']:
+            #If the user is not admin
+            return redirect(appbuilder.get_url_for_index)
+        form = self.form.refresh()
+        if form.validate_on_submit():
+            response = self.form_post(form)
+            if not response:
+                return redirect(appbuilder.get_url_for_index)
+            return response
+        else:
+            widgets = self._get_edit_widget(form=form)
+            return self.render_template(
+                self.form_template,
+                title=self.form_title,
+                widgets=widgets,
+                appbuilder=self.appbuilder,
+            )
 
     def form_post(self,form):
         s = [form.Strategy.choices[i][0] for i in range(3)]
@@ -445,13 +518,12 @@ appbuilder.add_view(
     category='Allocation',
     category_label=_('Allocation'),
     category_icon='fa-search')
-        #read result csv
 
 @app.route('/loading/',methods=['GET'])
 def loading():
     flag = 0
     while 1:
-        if app.config["SETTING_RENEWED"] == False and app.config['CALCULATING'] == False:
+        if app.config['CALCULATING'] == False:
             return "Success"
         time.sleep(1)
 
@@ -508,6 +580,7 @@ class OverviewView(BaseView):
         if len(U.course)>0:
             html = U.course[['Course','Code','Act','Ins/Sec']]
             html = html[html['Act']>0]
+            html.columns = ['Course','Code','# of Sections','Workload per section']
             html = html.sort_values("Code").to_html(index=False)
             return self.render_template(
                     "overview.html", 
