@@ -45,6 +45,7 @@ class Calculator():
 
         self.config["top"] = sysconfig[sysconfig['config']=='Penalty_for_teaching_more_than_MaxSec'].iloc[0,1]
         self.config["bottom"] = sysconfig[sysconfig['config']=='Penalty_for_teaching_less_than_MaxSec'].iloc[0,1]
+        self.config["NHP"] = sysconfig[sysconfig['config']=='Penalty_for_both_NP_and_NH'].iloc[0,1]
 
         self.config['Term'] = str(int(sysconfig[sysconfig['config']=='Year'].iloc[0,1]))+"-"+str(int(sysconfig[sysconfig['config']=='Term'].iloc[0,1]))
         self.config['Year'] = sysconfig[sysconfig['config']=='Year'].iloc[0,1]
@@ -95,6 +96,7 @@ class Calculator():
                     #print(p,self.pre_teacher_dict[p.split("(")[0]])
         self.correspond = correspond
         for j in range(self.instructor.shape[0]):
+            temp = [0]*len(self.W)
             for k in range(2,10):
                 code = a.iloc[j,k]
                 c = a.columns[k]
@@ -104,6 +106,8 @@ class Calculator():
                 # If the course is the preference
                 for i in correspond[code]:
                     self.W[i][j] *= config[c]
+                    temp[i] = 1
+                    #print(j,self.W[k])
             #Get the target number of classes the instructor need to teach
             maxsec = a.iloc[j,10]
             if not pd.isna(maxsec):
@@ -125,9 +129,18 @@ class Calculator():
                     #if course is in the keys
                     if b.Code[i] in code:
                         temp_f = min(1,familiarity)
-                    #print(correspond)
-                    for k in correspond[b.Code[i]]:
-                        self.W[k][j] *= temp_f
+                        #print(correspond)
+                        for k in correspond[b.Code[i]]:
+                            self.W[k][j] *= temp_f
+                            #Both NP NH
+                            temp[k] += 1
+            #if both NP NH
+            for k,v in enumerate(temp):
+                if v == 0:
+                    self.W[k][j] += self.config['NHP']
+        print("XXXXXXXXXXXXXXXXXXX:",self.W)
+        #raise Exception 
+                    
     #Greedy algorithm for bound
     def greedy(self,W,t):
         base = len(self.W)-len(W)
