@@ -12,6 +12,7 @@ class Calculator():
     def __init__(self,instructor,course,sysconfig):
         self.instructor = instructor
         self.course = course[course['Act']>0] #ignore course with 0 action
+        #self.rearrange_course()
         self.sysconfig = sysconfig
         self.W = []
         self.config = dict()
@@ -52,11 +53,17 @@ class Calculator():
         self.config['Intensity'] = sysconfig[sysconfig['config']=="Calculation_intensity"].iloc[0,1]
         self.weight_init()
 
+    def rearrange_course(self):
+        j = 0 
+        for i in range(1,len(self.course.Code)):
+            count = (self.instructor.iloc[:,2:7]==self.course.Code[i]).sum().sum()
+            if count<=0:
+                self.course.iloc[j,:],self.course.iloc[i,:] = self.course.iloc[i,:],self.course.iloc[j,:]
+                j += 1
     #preference weight * # of sections * workload - weight of history + penalty of multiple courses
     def weight_init(self):
         a = self.instructor#instructor csv
         b = self.course#course csv
-        #b = b[b['Act']>0] 
         temp = b['Act']*b['Ins/Sec']
         self.avg = temp.sum()/temp.shape[0]
         config = self.config# config file
@@ -97,15 +104,25 @@ class Calculator():
         self.correspond = correspond
         for j in range(self.instructor.shape[0]):
             temp = [0]*len(self.W)
+            preference = a.iloc[j,2:7].values
+            filled_preference = 0
+            for k in preference:
+                if type(k) is str and k!='0':
+                    filled_preference += 1
+            if filled_preference == 0:
+                filled_preference = 1
+                if type(a.iloc[j,-1]) is str:
+                    a.iloc[j,2] = a.iloc[j,-1].split('/')[0]
+            filled_preference = filled_preference/float(5)
             for k in range(2,10):
                 code = a.iloc[j,k]
                 c = a.columns[k]
                 # If the code is not in the available course list
-                if code not in b['Code'].values:
+                if code not in b['Code'].values or code not in correspond:
                     continue
                 # If the course is the preference
                 for i in correspond[code]:
-                    self.W[i][j] *= config[c]
+                    self.W[i][j] *= config[c] * filled_preference
                     temp[i] = 1
                     #print(j,self.W[k])
             #Get the target number of classes the instructor need to teach
@@ -314,6 +331,8 @@ class Calculator():
             print(temp_costs,self.avg)
             self.bestcost = temp_costs
             self.beststrategies = temp_strategies
+        if len(self.bestcost)<3:
+            return False,False,False
         d = dict()
         d["Strategy 1"] = []
         d["Strategy 2"] = []

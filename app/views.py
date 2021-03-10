@@ -416,8 +416,14 @@ class CalculateFormView(SimpleFormView):
         #costs,strategies,index = CalculateFormView.calculator.fetch_result3()
         try:
             costs,strategies,index = CalculateFormView.calculator.fetch_result3()
+            if costs==False:
+                flash(as_unicode("Cannot find the strategy"), "danger")
+
+                return redirect(appbuilder.get_url_for_index)
         except Exception as e:
+            app.config['SETTING_RENEWED'] = True #mark for calculation
             flash(as_unicode("Error: Fetch result failed. Please retry it"), "danger")
+
             return redirect(appbuilder.get_url_for_index)
         form = self.form.refresh()
         self.form_get(form,costs)

@@ -14,7 +14,7 @@ Penalty_for_teaching_third_different_course,2
 Penalty_for_teaching_more_than_four_different_course,10
 Penalty_for_teaching_more_than_MaxSec,400
 Penalty_for_teaching_less_than_MaxSec,0
-Penalty_for_both_NP_and_NH,20
+Penalty_for_both_NP_and_NH,1
 Calculation_intensity,0.5
 Year,2021
 Term,1
