@@ -8,13 +8,13 @@ Weight_for_meeting_courses_not_to_teach,5
 Weight_for_not_meeting_any_of_the_5_preference,1
 Weight_for_courses_taught_in_the_past,0.9
 Weight_for_additional_instructor_to_a_course,3.0
-Penalty_for_teaching_classes,0.5
+Penalty_for_teaching_classes,1
 Penalty_for_teaching_second_different_course,1
 Penalty_for_teaching_third_different_course,2
 Penalty_for_teaching_more_than_four_different_course,10
 Penalty_for_teaching_more_than_MaxSec,400
 Penalty_for_teaching_less_than_MaxSec,0
-Penalty_for_both_NP_and_NH,1
+Penalty_for_both_NP_and_NH,2
 Calculation_intensity,0.5
 Year,2021
 Term,1

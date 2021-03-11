@@ -12,7 +12,7 @@ class Calculator():
     def __init__(self,instructor,course,sysconfig):
         self.instructor = instructor
         self.course = course[course['Act']>0] #ignore course with 0 action
-        #self.rearrange_course()
+        self.rearrange_course()
         self.sysconfig = sysconfig
         self.W = []
         self.config = dict()
@@ -53,13 +53,25 @@ class Calculator():
         self.config['Intensity'] = sysconfig[sysconfig['config']=="Calculation_intensity"].iloc[0,1]
         self.weight_init()
 
-    def rearrange_course(self):
+    def rearrange_course1(self):
         j = 0 
         for i in range(1,len(self.course.Code)):
             count = (self.instructor.iloc[:,2:7]==self.course.Code[i]).sum().sum()
             if count<=0:
                 self.course.iloc[j,:],self.course.iloc[i,:] = self.course.iloc[i,:],self.course.iloc[j,:]
                 j += 1
+    def rearrange_course(self):
+        count_list = []
+        for i in self.course.Code:
+            count_list.append((self.instructor.iloc[:,2:7]==i).sum().sum())
+        index = np.array(count_list).argsort()
+        print("XXXXXXXXXXXXXXXXXXXXXXX",self.course.Code)
+        print("XXXXXXXXXXXXXXXXXXXXXXX",index)
+        print("XXXXXXXXXXXXXXXXXXXXXXX",count_list)
+        self.course = self.course.iloc[index,:]
+        self.course.index = range(self.course.shape[0])
+
+
     #preference weight * # of sections * workload - weight of history + penalty of multiple courses
     def weight_init(self):
         a = self.instructor#instructor csv
@@ -122,7 +134,7 @@ class Calculator():
                     continue
                 # If the course is the preference
                 for i in correspond[code]:
-                    self.W[i][j] *= config[c] * filled_preference
+                    self.W[i][j] *= config[c] #* filled_preference
                     temp[i] = 1
                     #print(j,self.W[k])
             #Get the target number of classes the instructor need to teach
@@ -149,7 +161,6 @@ class Calculator():
                         #print(correspond)
                         for k in correspond[b.Code[i]]:
                             self.W[k][j] *= temp_f
-                            #Both NP NH
                             temp[k] += 1
             #if both NP NH
             for k,v in enumerate(temp):
@@ -312,27 +323,32 @@ class Calculator():
         return self.bestcost,self.beststrategies
 
     def fetch_result3(self):
-        temp_costs = []
-        temp_strategies = []
-        if self.filtered==False:
-            unavailable_strategy = []
-            for i in range(len(self.bestteacherlists)):
-                strategy = self.bestteacherlists[i]
-                for j,workload in enumerate(strategy):
-                    if workload < self.teacherMax[j] and workload < int(self.avg):
-                        unavailable_strategy.append(i)
-                        break
-            for i in range(len(self.beststrategies)):
-                if i in unavailable_strategy:
-                    continue
-                temp_costs.append(self.bestcost[i])
-                temp_strategies.append(self.beststrategies[i])
-            self.filtered = True
-            print(temp_costs,self.avg)
-            self.bestcost = temp_costs
-            self.beststrategies = temp_strategies
-        if len(self.bestcost)<3:
-            return False,False,False
+        while True:
+            temp_costs = []
+            temp_strategies = []
+            if self.filtered==False:
+                unavailable_strategy = []
+                for i in range(len(self.bestteacherlists)):
+                    strategy = self.bestteacherlists[i]
+                    for j,workload in enumerate(strategy):
+                        if workload < self.teacherMax[j] and workload < self.avg:
+                            unavailable_strategy.append(i)
+                            break
+                for i in range(len(self.beststrategies)):
+                    if i in unavailable_strategy:
+                        continue
+                    temp_costs.append(self.bestcost[i])
+                    temp_strategies.append(self.beststrategies[i])
+                print(temp_costs,self.avg)
+            if len(temp_costs)>=1:
+                self.filtered = True
+                self.bestcost = temp_costs
+                self.beststrategies = temp_strategies
+                break
+            else:
+                self.avg -= 0.5
+            if self.avg <= 0:
+                return False,False,False
         d = dict()
         d["Strategy 1"] = []
         d["Strategy 2"] = []
