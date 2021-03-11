@@ -340,6 +340,8 @@ class Calculator():
                     temp_costs.append(self.bestcost[i])
                     temp_strategies.append(self.beststrategies[i])
                 print(temp_costs,self.avg)
+            else:
+                break
             if len(temp_costs)>=1:
                 self.filtered = True
                 self.bestcost = temp_costs
