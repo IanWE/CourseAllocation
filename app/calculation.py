@@ -366,8 +366,8 @@ class Calculator():
             mid = (ma+mi)/2
         first = self.beststrategies[self.bestcost.index(mi)]
         #print(mid,np.where(costs>=mid)[0])
-        second = self.beststrategies[self.bestcost.index(costs[costs>mid][0])]
-        third = self.beststrategies[self.bestcost.index(costs[costs>ma][0])]
+        second = self.beststrategies[self.bestcost.index(costs[costs>=mid][0])]
+        third = self.beststrategies[self.bestcost.index(costs[costs>=ma][0])]
         self.beststrategies = [first,second,third]
         self.bestcost = [mi,mid,ma]
         #print(self.beststrategies)
