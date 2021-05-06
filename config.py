@@ -126,7 +126,16 @@ FAB_ROLES = {
         ["Allocate","menu_access"],
         ["CalculateFormView","can_this_form_get"],
         ["CalculateFormView","can_this_form_post"],
-        ["CalculateFormView","can_form_view"]
+        ["CalculateFormView","can_form_view"],
+        ["ResetMyPasswordView","can_this_form_get"],
+        ["ResetMyPasswordView","can_this_form_post"],
+        ["ResetMyPasswordView","can_form_view"],
+        ["UserInfoEditView","can_this_form_get"],
+        ["UserInfoEditView","can_this_form_post"],
+        ["UserInfoEditView","can_form_view"],
+        ["UserDBModelView","can_userinfo"],
+        ["UserDBModelView","resetmypassword"],
+        ["UserDBModelView","userinfoedit"],
     ]
 }
 
