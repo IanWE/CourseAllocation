@@ -194,7 +194,12 @@ class Calculator():
                             temp[j] += self.config[4]
                 #Teachers should teach target number of classes
                 if teachers[j] >= self.teacherMax[j]:
-                    temp[j] += self.config["top"]
+                    if self.course_ins[i+base]<1 and teachers[j]-self.teacherMax[j]<1:
+                        temp[j] += self.config["top"]/2
+                    else:
+                        temp[j] += self.config["top"]**(self.course_ins[i+base]+teachers[j]-self.teacherMax[j])
+
+                    #temp[j] += self.config["top"]*(self.course_ins[i+base]+teachers[j]-self.teacherMax[j])
                 else:
                     temp[j] += self.config["bottom"]/(self.teacherMax[j]-teachers[j])
                 #Let a course be only assigned to one teacher
@@ -272,7 +277,10 @@ class Calculator():
                     penalty += l
                 #Teachers should teach the target number of courses
                 if self.teachers[j] >= int(self.teacherMax[j]):
-                    penalty += self.config["top"]
+                    if self.course_ins[i]<1 and self.teachers[j]-self.teacherMax[j]<1:
+                        penalty += self.config["top"]/2
+                    else:
+                        penalty += self.config["top"]**(self.course_ins[i]+self.teachers[j]-self.teacherMax[j])
                 else:
                     penalty += self.config["bottom"]/(self.teacherMax[j]-self.teachers[j])
                 self.teachers[j] += self.course_ins[i]
