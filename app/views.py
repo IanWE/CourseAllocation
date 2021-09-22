@@ -114,20 +114,49 @@ appbuilder.add_view(
 #Submit form
 def getChoices():
     name = app.config["COURSE"]
+    choices = []
     if os.path.exists(os.path.join(app.config["UPLOAD_FOLDER"],name)):
         #Load and sort
         course = pd.read_csv(os.path.join(app.config["UPLOAD_FOLDER"],name))
         course.sort_values("Act",inplace=True,ascending=False)
         course.to_csv(os.path.join(app.config["UPLOAD_FOLDER"],name),index=False)
-        course = pd.read_csv(os.path.join(app.config["UPLOAD_FOLDER"],name))
 
-        choices = course.iloc[:,1].tolist()
-        choices = [(i,choices[i]) for i in range(len(choices))]
+        #course = pd.read_csv(os.path.join(app.config["UPLOAD_FOLDER"],name))
+        #choices = course.iloc[:,1].tolist()
+        #choices = [(i,choices[i]) for i in range(len(choices))]
+        # Filtering
+        course = pd.read_csv(os.path.join(app.config["UPLOAD_FOLDER"],app.config["COURSE"]))
+        Code = sorted(list(set(course['Code'])))
+        #exlude those prelocated courses.
+        for i in Code:
+            if len(course[course.Code==i].Course.to_list())>1:
+                choices.append(" and ".join(course[course.Code==i].Course.to_list())+"("+i+")")
+                continue
+            pl = course[course.Code==i]['PreAllocation'].values[0]
+            act = course[course.Code==i]["Act"].values[0]
+            if act==0:
+                continue
+            print(pl, type(pl) is str)
+            if type(pl) is str:
+                pl = pl.split("/")
+                number_of_courses = 0
+                for c in pl:
+                    print("Calculate ",c)
+                    number_of_courses += int(c.split("(")[-1].split(")")[0])
+                print(i)
+                print("Number of courses:",number_of_courses)
+                print("Act:",act)
+                if number_of_courses >= act:
+                    continue
+            choices.append(" and ".join(course[course.Code==i].Course.to_list())+"("+i+")")
+        choices = [(0,"None")]+[(i+1,choices[i]) for i in range(len(choices))]
         U.course = course
         U.choices = choices
+
     if os.path.exists(os.path.join(app.config["UPLOAD_FOLDER"],app.config["INSTRUCTOR"])):
         U.lock.acquire()
         U.instructor = pd.read_csv(os.path.join(app.config["UPLOAD_FOLDER"],app.config["INSTRUCTOR"]))
+        print(U.instructor)
         U.lock.release()
         if U.instructor.shape[1]==2:
             U.instructor['FirstP'] = ""
@@ -178,18 +207,26 @@ class FillupView(SimpleFormView):
             appbuilder=self.appbuilder,
         )
     def form_get(self,form):
+        self.columns = U.instructor.columns[2:10]
         user = g.user
         log.debug(user.email)
+        log.debug(U.instructor)
         user_info = U.instructor[U.instructor.email==user.email]
         courses = U.course
         log.debug(user_info)
         if user_info.shape[0]<=0:
+            log.debug("XXXXXXXXXXXXXXXXXXXXX")
             return True
         prechoice = user_info.iloc[0,2:10]
         for j,i in enumerate(self.columns):
-            if not pd.isna(prechoice[j]) and prechoice[j] in courses['Code'].values:
+            #log.debug((not pd.isna(prechoice[j])))
+            #log.debug(prechoice[j]!=0)
+            #log.debug(prechoice[j])
+            if ((not pd.isna(prechoice[j])) or prechoice[j]!=0) and prechoice[j] in courses['Code'].values:
                 form.listoffield[i].data = user_info.iloc[0,:][i]
                 form.listoffield[i].description = "You have chose "+prechoice[j]+"."
+            form.listoffield[i].choices = U.choices
+            #print(form.listoffield[i].choices)
 
     @expose("/form", methods=["POST"])
     @has_access

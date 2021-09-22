@@ -42,6 +42,7 @@ if os.path.exists(os.path.join(app.config["UPLOAD_FOLDER"],app.config["SYSCONFIG
 
 if os.path.exists(os.path.join(app.config["UPLOAD_FOLDER"],app.config["INSTRUCTOR"])):
     instructor = pd.read_csv(os.path.join(app.config["UPLOAD_FOLDER"],app.config["INSTRUCTOR"]))
+    print(instructor)
 
 
 
