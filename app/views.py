@@ -37,6 +37,27 @@ def compress_file(zipfilename, dirname):
                     if single_file != zipfilename:
                         filepath = os.path.join(root, single_file)
                         z.write(filepath)
+"""
+    Switch 
+"""
+class SwitchView(SimpleFormView):
+    form = SwitchForm
+    form_title = _('Switch of the calculation')
+    message = "The settings are already in effect."
+    def form_post(self,form):
+        U.switch = form.switch.data
+        U.stop = form.stop.data
+        U.keep = form.keep.data
+        print(U.switch,U.stop)
+
+appbuilder.add_view(
+    SwitchView,
+    "Switch",
+    label=_('Switch to disable calculation.'),
+    icon='fa-sliders',
+    category='Setting',
+    category_label=_('Setting'),
+    category_icon='fa-wrench')
 
 """
     Upload
@@ -120,7 +141,6 @@ def getChoices():
         course = pd.read_csv(os.path.join(app.config["UPLOAD_FOLDER"],name))
         course.sort_values("Act",inplace=True,ascending=False)
         course.to_csv(os.path.join(app.config["UPLOAD_FOLDER"],name),index=False)
-
         #course = pd.read_csv(os.path.join(app.config["UPLOAD_FOLDER"],name))
         #choices = course.iloc[:,1].tolist()
         #choices = [(i,choices[i]) for i in range(len(choices))]
@@ -149,7 +169,7 @@ def getChoices():
                 if number_of_courses >= act:
                     continue
             choices.append(" and ".join(course[course.Code==i].Course.to_list())+"("+i+")")
-        choices = [(0,"None")]+[(i+1,choices[i]) for i in range(len(choices))]
+        choices = [(0,"None")]+[(Code[j],choices[j]) for j in range(len(choices))]
         U.course = course
         U.choices = choices
 
@@ -207,7 +227,7 @@ class FillupView(SimpleFormView):
             appbuilder=self.appbuilder,
         )
     def form_get(self,form):
-        self.columns = U.instructor.columns[2:10]
+        #self.columns = U.instructor.columns[2:10]
         user = g.user
         log.debug(user.email)
         log.debug(U.instructor)
@@ -222,7 +242,7 @@ class FillupView(SimpleFormView):
             #log.debug((not pd.isna(prechoice[j])))
             #log.debug(prechoice[j]!=0)
             #log.debug(prechoice[j])
-            if ((not pd.isna(prechoice[j])) or prechoice[j]!=0) and prechoice[j] in courses['Code'].values:
+            if not pd.isna(prechoice[j]) and prechoice[j] in courses['Code'].values:
                 form.listoffield[i].data = user_info.iloc[0,:][i]
                 form.listoffield[i].description = "You have chose "+prechoice[j]+"."
             form.listoffield[i].choices = U.choices
@@ -432,6 +452,16 @@ class CalculateFormView(SimpleFormView):
             flash(as_unicode(self.error_message), "danger")
             return redirect(appbuilder.get_url_for_index)
         #if os.path.exists(os.path.join(app.config["FILE_FOLDER"],app.config["result"])):
+        user = g.user
+        email = user.email
+        print("Switch:",U.switch)
+        if email!=app.config['ADMIN'] and U.switch=="s1":
+            flash(as_unicode("Currently, only admin has the access to the calculation page"), "danger")
+            return redirect(appbuilder.get_url_for_index)
+        if U.keep == False:
+           app.config["SETTING_RENEWED"] = True
+           U.stop = False
+           U.keep = True
         if app.config["SETTING_RENEWED"] == True:
             if app.config['CALCULATING'] == False:
                 try:
@@ -451,16 +481,16 @@ class CalculateFormView(SimpleFormView):
     def this_form_get(self):
         self._init_vars()
         #costs,strategies,index = CalculateFormView.calculator.fetch_result3()
+        user = g.user
+        email = user.email
         try:
             costs,strategies,index = CalculateFormView.calculator.fetch_result3()
             if costs==False:
                 flash(as_unicode("Cannot find the strategy"), "danger")
-
                 return redirect(appbuilder.get_url_for_index)
         except Exception as e:
             app.config['SETTING_RENEWED'] = True #mark for calculation
             flash(as_unicode("Error: Fetch result failed. Please retry it."), "danger")
-
             return redirect(appbuilder.get_url_for_index)
         form = self.form.refresh()
         self.form_get(form,costs)
@@ -468,8 +498,6 @@ class CalculateFormView(SimpleFormView):
         self.update_redirect()
         strategies = self.to_html(strategies)
         #For other instructor, show a page without button
-        user = g.user
-        email = user.email
         if email!=app.config['ADMIN']:
             return self.render_template(
                 self.vform_template,

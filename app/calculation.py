@@ -6,6 +6,7 @@ import random
 import logging
 import copy
 from . import app
+from . import utils as U
 
 log = logging.getLogger(__name__)
 class Calculator():
@@ -224,8 +225,8 @@ class Calculator():
             rest_W = W[i:]
             bound,_ = self.greedy(rest_W,teachers)
             return bound
-        if round(self.cost,5) >= round(self.mincost,5):
-            #print("Ignore:"+str(self.mincost)+"   "+str(self.trace)+" "+str(self.bestcost))
+        if round(self.cost,5) >= round(self.mincost,5) or U.stop==True:
+            print("Ignore:"+str(self.mincost)+"   "+str(self.trace)+" "+str(self.bestcost))
             return
         elif i >= len(self.W):
             #penalty_insufficiency = 0
@@ -287,7 +288,7 @@ class Calculator():
                 self.cost += penalty
                 self.trace.append(j)
                 #print(i)
-                #print(self.trace)
+                print(self.trace)
                 self.dfs(i+1)
                 #traceback
                 self.teachers[j] -= self.course_ins[i]

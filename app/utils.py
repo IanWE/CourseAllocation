@@ -3,6 +3,9 @@ import pandas as pd
 from . import appbuilder, db, app
 import os
 
+switch = "s1"
+stop = False
+keep = True
 course = []
 instructor = []
 sysconfig = []
@@ -34,7 +37,7 @@ if os.path.exists(os.path.join(app.config["UPLOAD_FOLDER"],app.config["COURSE"])
             if number_of_courses >= act:
                 continue
         choices.append(" and ".join(course[course.Code==i].Course.to_list())+"("+i+")")
-    choices = [(0,"None")]+[(i+1,choices[i]) for i in range(len(choices))]
+    choices = [(0,"None")]+[(Code[j],choices[j]) for j in range(len(choices))]
     #choices = [(0,"None")]+[(Code[j],choices[j]) for j in range(len(choices)) if "as faculty" not in choices[j]]
 
 if os.path.exists(os.path.join(app.config["UPLOAD_FOLDER"],app.config["SYSCONFIG"])):

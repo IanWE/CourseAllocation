@@ -114,5 +114,10 @@ class CalculatorForm(DynamicForm):
     Strategy = RadioField('Strategy', choices=[('s1', 'Strategy 1'), ('s2', 'Strategy 2'), ('s3', 'Strategy 3')],        
             description=_("Plan"))
 
+class SwitchForm(DynamicForm):
+    switch = RadioField('Switch', default="s1", choices=[('s1', "Disable calculation from users"), ('s2', 'Allow calculation from users')])        
+    stop = BooleanField('Stop current calculation?', default='checked')
+    keep = BooleanField('Keep the temporary result', default='checked',description=_("If true, the temporary calculated result will be remained. Otherwise, unchecked it to recalculate the strategy"))
+
 class CalculatorViewForm(DynamicForm):
     pass
