@@ -252,10 +252,10 @@ class FillupView(SimpleFormView):
     @has_access
     def this_form_post(self):
         self._init_vars()
+        form = self.form.refresh()
+        widgets = self._get_edit_widget(form=form)
         if app.config['CALCULATING'] == True:
             flash(as_unicode("Allocation routine running in progress. Please submit your form a couple of minutes later."), "danger")
-            form = self.form.refresh()
-            widgets = self._get_edit_widget(form=form)
             return self.render_template(
                 self.form_template,
                 title=self.form_title,
@@ -263,11 +263,22 @@ class FillupView(SimpleFormView):
                 appbuilder=self.appbuilder,
             )
         elif app.config['CALCULATING'] == False:
-            form = self.form.refresh()
+            temp = []
             for i,j in enumerate(self.columns):
                 if (i>0 and i<5) or i>5:
                     s = "Preference" if i<5 else "Unwanted Course"
                     form.listoffield[j].validators = [seq_sel(form.listoffield[self.columns[i-1]], s)]
+                if form.listoffield[j].data!="0":
+                    temp.append(form.listoffield[j].data)
+                if len(temp)!=len(set(temp)):
+                    flash(as_unicode("You cannot choose the same course in any of the two inputs"), "danger")
+                    #widgets = self._get_edit_widget(form=form)
+                    return self.render_template(
+                               self.form_template,
+                               title=self.form_title,
+                               widgets=widgets,
+                               appbuilder=self.appbuilder,
+                           )
             if form.validate_on_submit():
                 response = self.form_post(form)
                 if not response:
@@ -275,7 +286,7 @@ class FillupView(SimpleFormView):
                     return redirect(appbuilder.get_url_for_index)
                 return response
             else:
-                widgets = self._get_edit_widget(form=form)
+                #widgets = self._get_edit_widget(form=form)
                 return self.render_template(
                     self.form_template,
                     title=self.form_title,
