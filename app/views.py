@@ -233,16 +233,17 @@ class FillupView(SimpleFormView):
         log.debug(U.instructor)
         user_info = U.instructor[U.instructor.email==user.email]
         courses = U.course
-        log.debug(user_info)
+        #log.debug(user_info)
         if user_info.shape[0]<=0:
-            log.debug("XXXXXXXXXXXXXXXXXXXXX")
             return True
         prechoice = user_info.iloc[0,2:10]
+        log.debug(prechoice)
         for j,i in enumerate(self.columns):
             #log.debug((not pd.isna(prechoice[j])))
             #log.debug(prechoice[j]!=0)
             #log.debug(prechoice[j])
             if not pd.isna(prechoice[j]) and prechoice[j] in courses['Code'].values:
+                #log.debug(user_info.iloc[0,:][i])
                 form.listoffield[i].data = user_info.iloc[0,:][i]
                 form.listoffield[i].description = "You have chose "+prechoice[j]+"."
             form.listoffield[i].choices = U.choices
@@ -268,6 +269,7 @@ class FillupView(SimpleFormView):
                 if (i>0 and i<5) or i>5:
                     s = "Preference" if i<5 else "Unwanted Course"
                     form.listoffield[j].validators = [seq_sel(form.listoffield[self.columns[i-1]], s)]
+                #Prohibit the same courses being selected
                 if form.listoffield[j].data!="0":
                     temp.append(form.listoffield[j].data)
                 if len(temp)!=len(set(temp)):
@@ -301,6 +303,7 @@ class FillupView(SimpleFormView):
         for i in self.columns:
             U.lock.acquire()
             U.instructor.loc[index,i] = form.listoffield[i].data
+            print(i,form.listoffield[i].data)
             app.config['SETTING_RENEWED'] = True #mark for calculation
             U.lock.release()
             log.debug(user.email+":"+i+"-"+form.listoffield[i].data)
@@ -465,7 +468,7 @@ class CalculateFormView(SimpleFormView):
         #if os.path.exists(os.path.join(app.config["FILE_FOLDER"],app.config["result"])):
         user = g.user
         email = user.email
-        print("Switch:",U.switch)
+        #print("Switch:",U.switch)
         if email!=app.config['ADMIN'] and U.switch=="s1":
             flash(as_unicode("Currently, only admin has the access to the calculation page"), "danger")
             return redirect(appbuilder.get_url_for_index)
