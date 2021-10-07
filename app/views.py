@@ -147,6 +147,7 @@ def getChoices():
         # Filtering
         course = pd.read_csv(os.path.join(app.config["UPLOAD_FOLDER"],app.config["COURSE"]))
         Code = sorted(list(set(course['Code'])))
+        available_code = []
         #exlude those prelocated courses.
         for i in Code:
             if len(course[course.Code==i].Course.to_list())>1:
@@ -169,7 +170,8 @@ def getChoices():
                 if number_of_courses >= act:
                     continue
             choices.append(" and ".join(course[course.Code==i].Course.to_list())+"("+i+")")
-        choices = [(0,"None")]+[(Code[j],choices[j]) for j in range(len(choices))]
+            available_code.append(i)
+        choices = [(0,"None")]+[(available_code[j],choices[j]) for j in range(len(choices))]
         U.course = course
         U.choices = choices
 
