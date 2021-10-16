@@ -17,9 +17,11 @@ from flask_appbuilder._compat import as_unicode
 import logging
 from werkzeug.utils import secure_filename
 from .calculation import Calculator
+from .calculation_greedy import Calculator_greedy
 from wtforms.validators import ValidationError
 import re
-
+ 
+greedy_only = 0
 log = logging.getLogger(__name__)
 executor = ThreadPoolExecutor(10)
 """
@@ -108,6 +110,9 @@ class UploadView(SimpleFormView):
         csv_names = [app.config["INSTRUCTOR"],app.config["COURSE"],app.config["SYSCONFIG"]]
         csv_list =  [form.instructor.data,form.course.data,form.sysconfig.data]
         flag = 0
+        global greedy_only
+        greedy_only = form.greedy.data
+        app.config['SETTING_RENEWED'] = True #mark for calculation
         for i,csv_file in enumerate(csv_list):
             if csv_file is not None:
                 f = os.path.join(app.config['UPLOAD_FOLDER'], csv_names[i])
@@ -378,7 +383,11 @@ class CalculateFormView(SimpleFormView):
     vform_template = "instructor_strategy_page.html"
     view_template = "loading.html"
     message = "Saved successfully"
-    calculator = Calculator(U.instructor,U.course,U.sysconfig)
+    global greedy_only
+    if greedy_only == 0:
+        calculator = Calculator(U.instructor,U.course,U.sysconfig)
+    else:
+        calculator = Calculator_greedy(U.instructor,U.course,U.sysconfig,300)
     default_view = "form_view"
 
     def to_html(self,strategies):
@@ -452,8 +461,13 @@ class CalculateFormView(SimpleFormView):
 
     def calculate(self):
         app.config['CALCULATING'] = True
-        CalculateFormView.calculator = Calculator(U.instructor,U.course,U.sysconfig)
+        global greedy_only
+        if greedy_only==0:
+            CalculateFormView.calculator = Calculator(U.instructor,U.course,U.sysconfig)
+        else:
+            CalculateFormView.calculator = Calculator_greedy(U.instructor,U.course,U.sysconfig,greedy_only)
         CalculateFormView.calculator.calculate()
+        print("DDDDDDDDDDDDDDDDDDDDDDDDDDDD",greedy_only)
         U.lock.acquire()
         app.config['SETTING_RENEWED'] = False
         app.config['CALCULATING'] = False
@@ -476,15 +490,18 @@ class CalculateFormView(SimpleFormView):
             return redirect(appbuilder.get_url_for_index)
         if U.keep == False:
            app.config["SETTING_RENEWED"] = True
-           U.stop = False
            U.keep = True
+        U.stop = False
         if app.config["SETTING_RENEWED"] == True:
             if app.config['CALCULATING'] == False:
                 try:
+                    app.config['CALCULATING'] = True
                     executor.submit(self.calculate)
+                    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
                 except Exception as e:
                     flash(as_unicode("Error:Calulation Failed"), "danger")
                     log.debug(e)
+            print("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
             return self.render_template(
                         self.view_template,
                         appbuilder = self.appbuilder,
@@ -611,6 +628,7 @@ def loading():
     flag = 0
     while 1:
         if app.config['CALCULATING'] == False:
+            print("CCCCCCCCCCCCCCCCCCCCCCC",app.config['CALCULATING'])
             return "Success"
         time.sleep(1)
 

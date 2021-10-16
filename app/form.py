@@ -41,6 +41,8 @@ class UploadForm(DynamicForm):
         #widget=BS3TextFieldWidget()
     ) 
 
+    greedy = IntegerField('Greedy Only?', default=100, description=_("Use greedy algorithm only, and the system will select the 3 best results from a pool. The number denotes how many greedy-based results in the pool will be generated."))
+
 class FillupForm(DynamicForm):
     FirstP = SelectField(
         _('First preference'),

@@ -1,36 +1,25 @@
 Course,Code,Act,Ins/Sec,PreAllocation
-Interactive Design & Prototyping,IS211,14,1.0,
-Introduction to Programming,IS111,12,1.0,
-Buisness Process Analysis & Solutioning,IS210,10,1.0,
-Web Application Development II,IS216,8,1.0,
-Computational Thinking,IS1702,6,0.5,
-Introduction to Machine Learning,CS421,3,1.0,
-Introduction to Artificial Intelligence,CS420,2,1.0,
-Analytics Foundation,IS217,2,1.0,
-Computational Thinking (as faculty),IS1702F,2,1.0,Mok Heng Ngee(2)
-Programming Fundamentals I,CS101,2,1.0,
-Data Stuctructures and Algorithms,CS201,2,1.0,
+Data Management,IS112,15,1.0,
+Web Application Development I,IS113,11,1.0,
+Enterprise Solution Developmt,IS213,11,1.0,
+Enterprise Solution Management,IS214,10,1.0,
+Digital Business,IS215,10,1.0,
+Computational Thinking,IS1702,9,0.5,
+Software Product Management,CS206,3,1.0,
+Stat Thinking for Data Science,CS105,3,1.0,
+Design & Analysis of Algorithm,CS202,3,1.0,
 Introduction to Programming (as faculty),IS111F,2,1.0,Joelle Elmaleh(1)/Michelle Kan(1)
-Mathematical Foundations for Computing,CS104,2,1.0,
-Software Project Management,IS212,1,1.0,
-Interconnection of Cyber-Physical Systems,CS204,1,1.0,
-Digital Busness: Technology & Transformation,IS215,1,1.0,
-Enterprise Business Solution (as faculty),IS412F,1,1.0,Lum Eng Kit(1)
-Object Oriented Programming,IS442,1,1.0,
-Managing Customer Relations with Analytics: Asian Insights,IS446,1,1.0,
-Internet of Things: Technology and Applications,IS614,1,1.0,
-Internet of Things: Technology and Applications,CS462,1,1.0,
-Collaborative Software Development,CS203,1,1.0,
-Design and Analysis of Algorithms,CS202,0,1.0,
-Programming Fundamentals II (OOP),CS102,0,1.0,
-Web Application Development,IS113,0,1.0,
-Foundations of Cyber-physical Systems (as faculty),CS460F,0,1.0,
-Data Management (as faculty),IS105F,0,1.0,
-Data Management,IS112,0,1.0,
-Statistical Thinking for Data Science,CS105,0,1.0,
-Web Application Development (as faculty),IS113F,0,1.0,
-Linear Algebra for Computing Applications,CS103,0,1.0,
-Enterprise Solution Management,IS214,0,1.0,
-Enterprise Solution Development,IS213,0,1.0,
-Operating Systems with Android,CS205,0,1.0,
-Computer Hardware for Embedded Systems,CS106,0,1.0,
+Programming Fundamentals II,CS102,2,1.0,
+Business Data Management (as faculty),IS105F,2,1.0,Swetha GOTTPATI(1)/Fiona Lee(1)
+Operatg Sys Concepts w Android,CS205,2,1.0,
+Comp Hardware & Embedded Sys,CS106,2,1.0,
+Interconnection of Cyber-Physical Systems (as faculty),CS204F,1,1.5,Pius Lee(1)
+Foundations of Cybersecurity,CS440,1,1.0,
+Foundations of Cyber-physical Systems (as faculty),CS460F,1,1.0,Pius Lee(1)
+Machine Learning & Applications,IS460,1,1.0,
+Financial Analytics,IS453,1,1.0,
+Digital Business (as faculty),IS215F,1,1.5,Lau Yi Meng(1)
+Enterprise Solution Management (as faculty),IS214F,1,1.5,Wendy Tan(1)
+Enterprise Solution Developmt (as faculty),IS213F,1,1.0,Lum Eng Kit(1)
+Web Application Development I (as faculty),IS113F,1,1.0,Lau Yi Meng(1)
+Internet of Things: Technology and Applications (as faculty),CS462F,1,1.0,Pius Lee(1)
