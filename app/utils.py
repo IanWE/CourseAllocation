@@ -2,6 +2,7 @@ import threading
 import pandas as pd
 from . import appbuilder, db, app
 import os
+import re
 
 switch = "s1"
 stop = False
@@ -26,16 +27,12 @@ if os.path.exists(os.path.join(app.config["UPLOAD_FOLDER"],app.config["COURSE"])
         act = course[course.Code==i]["Act"].values[0]
         if act==0:
             continue
-        print(pl, type(pl) is str)
         if type(pl) is str:
-            pl = pl.split("/")
+            pl = re.findall("[(](\d+)[)]",pl)
             number_of_courses = 0
             for c in pl:
                 print("Calculate ",c)
-                number_of_courses += int(c.split("(")[-1].split(")")[0])
-            #print(i)
-            #print("Number of courses:",number_of_courses)
-            #print("Act:",act)
+                number_of_courses += int(c)
             if number_of_courses >= act:
                 continue
         choices.append(" and ".join(course[course.Code==i].Course.to_list())+"("+i+")")
@@ -50,7 +47,5 @@ if os.path.exists(os.path.join(app.config["UPLOAD_FOLDER"],app.config["SYSCONFIG
 
 if os.path.exists(os.path.join(app.config["UPLOAD_FOLDER"],app.config["INSTRUCTOR"])):
     instructor = pd.read_csv(os.path.join(app.config["UPLOAD_FOLDER"],app.config["INSTRUCTOR"]))
-
-
 
 lock = threading.Lock()

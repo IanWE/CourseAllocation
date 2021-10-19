@@ -7,6 +7,7 @@ import logging
 import copy
 from . import app
 from . import utils as U
+import re
 
 log = logging.getLogger(__name__)
 class Calculator_greedy():
@@ -68,9 +69,28 @@ class Calculator_greedy():
         self.course = self.course.iloc[index,:]
         self.course.index = range(self.course.shape[0])
 
+    def split_courses(self,a,b,W,div,rem,i,n):
+        for j in range(div):#split courses
+            #Course:Index
+            self.number_of_contained_courses.append(n/b['Ins/Sec'][i])
+            self.number_of_contained_act.append(n)
+            self.correspond[b['Code'][i]] = self.correspond.get(b['Code'][i],[])#Code:[1,2,3]
+            self.correspond[b['Code'][i]].append(len(W))
+            W.append([n]*a.shape[0])
+            self.course_list.append(b['Code'][i])
+            self.course_ins.append(n)
+        if rem != 0:
+            self.number_of_contained_courses.append(rem/b['Ins/Sec'][i])
+            self.number_of_contained_act.append(rem)
+            self.correspond[b['Code'][i]] = self.correspond.get(b['Code'][i],[])#Code:[1,2,3]
+            self.correspond[b['Code'][i]].append(len(W))
+            W.append([rem]*a.shape[0])
+            self.course_list.append(b['Code'][i])
+            self.course_ins.append(rem)
+        return W
+        
     #preference weight * # of sections * workload - weight of history + penalty of multiple courses
     def weight_init(self,n=1):
-        print("=======================",n)
         W = []
         a = self.instructor#instructor csv
         b = self.course#course csv
@@ -78,7 +98,7 @@ class Calculator_greedy():
         self.avg = sum_sec.sum()/sum_sec.shape[0]
         self.number_of_contained_courses = []
         config = self.config# config file
-        correspond = dict() 
+        self.correspond = dict() 
         self.pre_teacher_num = dict()
         self.pre_teacher_dict = dict()#pre-allocated courses, teacher:courses
         self.course_list = []#course list, index of W: course
@@ -90,40 +110,23 @@ class Calculator_greedy():
             if type(b['PreAllocation'][i]) is not str:
                 div = int(sum_sec[i]/n)
                 rem = sum_sec[i]%n
-                for j in range(div):#split courses
-                    #Course:Index
-                    self.number_of_contained_courses.append(n/b['Ins/Sec'][i])
-                    self.number_of_contained_act.append(n)
-                    correspond[b['Code'][i]] = correspond.get(b['Code'][i],[])#Code:[1,2,3]
-                    correspond[b['Code'][i]].append(len(W))
-                    W.append([n]*a.shape[0])
-                    self.course_list.append(b['Code'][i])
-                    self.course_ins.append(n)
-                if rem != 0:
-                    self.number_of_contained_courses.append(rem/b['Ins/Sec'][i])
-                    self.number_of_contained_act.append(rem)
-                    correspond[b['Code'][i]] = correspond.get(b['Code'][i],[])#Code:[1,2,3]
-                    correspond[b['Code'][i]].append(len(W))
-                    W.append([rem]*a.shape[0])
-                    self.course_list.append(b['Code'][i])
-                    self.course_ins.append(rem)
-                #else:
-                #    self.number_of_contained_act.append(int(sum_sec[i]/b['Ins/Sec'][i]))
-                #    self.number_of_contained_courses.append(sum_sec[i])
-                #    correspond[b['Code'][i]] = correspond.get(b['Code'][i],[])#Code:[1,2,3]
-                #    correspond[b['Code'][i]].append(len(W))
-                #    #print(correspond[b['Code'][i]])
-                #    W.append(a.shape[0]*sum_sec[i])
-                #    self.course_list.append(b['Code'][i])
-                #    self.course_ins.append(b['Ins/Sec'][i])
+                W = self.split_courses(a,b,W,div,rem,i,n)
             elif "(" in b['PreAllocation'][i]:
                 #load all pre-setted courses
+                pre_allocated_course = re.findall("[(](\d+)[)]",b['PreAllocation'][i])
+                pn = sum(map(int,pre_allocated_course))
+                if pn < b['Act'][i]:
+                    #print(b['Code'][i],(b['Act'][i] - pn))
+                    s_sec = (b['Act'][i] - pn)*b['Ins/Sec'][i]
+                    div = int(s_sec/n)
+                    rem = s_sec%n
+                    W = self.split_courses(a,b,W,div,rem,i,n)
                 p = b['PreAllocation'][i]
                 ins = b['Ins/Sec'][i]
                 l = p.split("/")
                 self.preset[b['Code'][i]] = p.replace("/","|")
                 for p in l:
-                    self.pre_teacher_num[p.split("(")[0]] = correspond.get(p.split("(")[0],0) 
+                    self.pre_teacher_num[p.split("(")[0]] = self.pre_teacher_num.get(p.split("(")[0],0) 
                     self.pre_teacher_num[p.split("(")[0]] += int(p.split("(")[1].split(")")[0])*ins#Instructor:Number
                     #Get the code without last "F", and store it in pre_teacher_dict
                     if b['Code'][i][-1]=="F":
@@ -132,12 +135,8 @@ class Calculator_greedy():
                         code = b['Code'][i]
                     self.pre_teacher_dict[p.split("(")[0]] = self.pre_teacher_dict.get(p.split("(")[0],[])
                     self.pre_teacher_dict[p.split("(")[0]].append(code)
-                    #print("Preset:")
-                    #print(p,self.pre_teacher_dict[p.split("(")[0]])
-        self.correspond = correspond
-        print("=====================W1================")
-        print(W)
-        print("=====================W1================")
+        print("Preset:")
+        print(self.preset)
         for j in range(self.instructor.shape[0]):
             npnh = [0]*len(W)
             preference = a.iloc[j,2:7].values
@@ -155,16 +154,18 @@ class Calculator_greedy():
                 code = a.iloc[j,k]
                 c = a.columns[k]
                 # If the code is not in the available course list
-                if code not in b['Code'].values or code not in correspond:
+                if code not in b['Code'].values or code not in self.correspond:
                     continue
-                # If the course is the preference
-                for i in correspond[code]:
+                # If the course is the preference or the list of not teaching.
+                for i in self.correspond[code]:
                     W[i][j] *= config[c] #* filled_preference
-                    npnh[i] += 1
-                    #print(j,self.W[k])
+                    if k<7:
+                        npnh[i] = 1
             #Get the target number of classes the instructor need to teach
             maxsec = a.iloc[j,10]
             if not pd.isna(maxsec):
+                self.teacherMax[j] = maxsec
+            else:
                 self.teacherMax[j] = 4
             #previous-taught classes
             if 'history' in a.columns:
@@ -175,13 +176,12 @@ class Calculator_greedy():
                 familiarity = config['history']
                 for i in range(b.shape[0]):
                     temp_f = 1
-                    if b.Code[i] in self.preset or b.Act[i]==0:
+                    if b.Code[i] not in self.correspond or b.Act[i]==0:
                         continue
                     #if course is in the keys
                     if b.Code[i] in history:
                         temp_f = min(1,familiarity)
-                        #print(correspond)
-                        for k in correspond[b.Code[i]]:
+                        for k in self.correspond[b.Code[i]]:
                             W[k][j] *= temp_f
                             npnh[k] += 2
             #if both NP NH
@@ -190,9 +190,9 @@ class Calculator_greedy():
                     W[k][j] += self.config['NHP']
                 elif v & 1==0:
                     W[k][j] += self.config['N']
-        print("=====================W=============")
-        print(W)
-        print("=====================W=============")
+        #print("=====================W=============")
+        #print(W)
+        #print("=====================W=============")
         return W
         #raise Exception 
                     
@@ -208,8 +208,6 @@ class Calculator_greedy():
             temp = copy.deepcopy(W[i])
             for j in range(len(teachers)):
                 #Add Penalty
-                #temp[j] = temp[j]*(1+self.config[1]*(teachers[j]+self.number_of_contained_courses[i]))
-                #temp[j] += self.config[1]*teachers[j]
                 teacher_dict[j] = teacher_dict.get(j,[])
                 #A teacher should teach different courses as few as possible
                 if len(set(teacher_dict[j])) > 0:
@@ -225,10 +223,8 @@ class Calculator_greedy():
                         temp[j] += self.config["top"]/2
                     else:
                         temp[j] += self.config["top"]*(self.number_of_contained_act[i+base]+teachers[j]-self.teacherMax[j])
-                    #temp[j] += self.config["top"]*(self.course_ins[i+base]+teachers[j]-self.teacherMax[j])
                 else:
                     temp[j] += self.config["bottom"]/(self.teacherMax[j]-teachers[j])
-            #print(str(temp))
             temp = list(temp)
             index = temp.index(min(temp))#get the teacher with the lowest penalty to teach this course
             #course_dict[self.course_list[i+base]].append(index)
@@ -236,7 +232,10 @@ class Calculator_greedy():
             teachers[index] += self.course_ins[i+base]
             s += temp[index]
             trace.append(index)
-        print("Result================================================")
+            #print(s)
+            #print(teachers[index],self.teacherMax[index])
+            #print(self.instructor.name.values[index],temp[index])
+        print("===================Result=============================")
         print(trace,s)
         print("=============Stop calculation===================")
         return s,trace
@@ -295,8 +294,7 @@ class Calculator_greedy():
             if len(index)==3:
                 break
         end=time.time()
-        print(len(self.courselists[0]),self.bestcost)
-
+        #print(len(self.courselists[0]),self.bestcost)
         log.debug("The procession took "+str(end-start)+" seconds")
     
     def fetch_result3(self):
@@ -322,12 +320,11 @@ class Calculator_greedy():
                             s += "|"
                         flag = 0
                         s += k+"("+str(strategy[i][j][k])+")"
-                elif j in self.preset:
+                if j in self.preset:
                     if flag!=1:
                         s += "|"
                     s += self.preset[j] 
                 d["Strategy "+str(i+1)].append(s)
-        print(d)
         index = self.course.Course+" {"+self.course.Code+"}"
         df = pd.DataFrame(d,index=index).sort_index()
         return self.bestcost,df,index

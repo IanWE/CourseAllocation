@@ -12,7 +12,7 @@ Penalty_for_teaching_classes,0.2
 Penalty_for_teaching_second_different_course,0.5
 Penalty_for_teaching_third_different_course,20
 Penalty_for_teaching_more_than_four_different_course,50
-Penalty_for_teaching_more_than_MaxSec,50
+Penalty_for_teaching_more_than_MaxSec,500
 Penalty_for_teaching_less_than_MaxSec,0
 Penalty_for_both_NP_and_NH,50
 Calculation_intensity,0.1

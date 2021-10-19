@@ -146,9 +146,6 @@ def getChoices():
         course = pd.read_csv(os.path.join(app.config["UPLOAD_FOLDER"],name))
         course.sort_values("Act",inplace=True,ascending=False)
         course.to_csv(os.path.join(app.config["UPLOAD_FOLDER"],name),index=False)
-        #course = pd.read_csv(os.path.join(app.config["UPLOAD_FOLDER"],name))
-        #choices = course.iloc[:,1].tolist()
-        #choices = [(i,choices[i]) for i in range(len(choices))]
         # Filtering
         course = pd.read_csv(os.path.join(app.config["UPLOAD_FOLDER"],app.config["COURSE"]))
         Code = sorted(list(set(course['Code'])))
@@ -164,11 +161,11 @@ def getChoices():
                 continue
             print(pl, type(pl) is str)
             if type(pl) is str:
-                pl = pl.split("/")
+                pl = re.findall("[(](\d+)[)]",pl)
                 number_of_courses = 0
                 for c in pl:
                     print("Calculate ",c)
-                    number_of_courses += int(c.split("(")[-1].split(")")[0])
+                    number_of_courses += int(c)
                 print(i)
                 print("Number of courses:",number_of_courses)
                 print("Act:",act)
@@ -467,7 +464,6 @@ class CalculateFormView(SimpleFormView):
         else:
             CalculateFormView.calculator = Calculator_greedy(U.instructor,U.course,U.sysconfig,greedy_only)
         CalculateFormView.calculator.calculate()
-        print("DDDDDDDDDDDDDDDDDDDDDDDDDDDD",greedy_only)
         U.lock.acquire()
         app.config['SETTING_RENEWED'] = False
         app.config['CALCULATING'] = False
@@ -497,11 +493,9 @@ class CalculateFormView(SimpleFormView):
                 try:
                     app.config['CALCULATING'] = True
                     executor.submit(self.calculate)
-                    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
                 except Exception as e:
                     flash(as_unicode("Error:Calulation Failed"), "danger")
                     log.debug(e)
-            print("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
             return self.render_template(
                         self.view_template,
                         appbuilder = self.appbuilder,
@@ -628,7 +622,6 @@ def loading():
     flag = 0
     while 1:
         if app.config['CALCULATING'] == False:
-            print("CCCCCCCCCCCCCCCCCCCCCCC",app.config['CALCULATING'])
             return "Success"
         time.sleep(1)
 

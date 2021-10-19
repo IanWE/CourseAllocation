@@ -70,6 +70,14 @@ class Calculator():
                     self.course_list.append(b['Code'][i])
                     self.course_ins.append(b['Ins/Sec'][i])
             elif "(" in b['PreAllocation'][i]:
+                pre_allocated_course = re.findall("[(](\d+)[)]",b['PreAllocation'][i])
+                pn = sum(map(int,pre_allocated_course))
+                if pn < b['Act'][i]:
+                    correspond[b['Code'][i]] = correspond.get(b['Code'][i],[])
+                    correspond[b['Code'][i]].append(len(self.W))
+                    self.W.append([b['Ins/Sec'][i]]*a.shape[0])
+                    self.course_list.append(b['Code'][i])
+                    self.course_ins.append(b['Ins/Sec'][i])
                 #load all pre-setted courses
                 p = b['PreAllocation'][i]
                 ins = b['Ins/Sec'][i]
