@@ -1,7 +1,7 @@
 name,email,FirstP,SecondP,ThirdP,FourthP,FifthP,FirstN,SecondN,ThirdN,MaxSec,history
 Lee Kok Khing,kklee@smu.edu.sg,IS113,0,0,0,0,0,0,0,4.0,IS112/IS113
 Chua Hong Ngoh,hnchua@smu.edu.sg,IS112,0,0,0,0,0,0,0,4.0,IS112/CS440
-Lum Eng Kit,eklum@smu.edu.sg,IS213,0,0,0,0,0,0,0,5.0,IS213/IS214
+Lum Eng Kit,eklum@smu.edu.sg,IS213,0,0,0,0,0,0,0,4.0,IS213/IS214
 Fiona Lee,fionalee@smu.edu.sg,IS112,0,0,0,0,0,0,0,4.0,IS1702/IS112
 Thiang Lay Foo,lfthiang@smu.edu.sg,IS213,CS102,IS112,0,0,IS113,IS215,IS214,4.0,IS213/IS214
 Joelle Elmaleh,joellee@smu.edu.sg,IS215,IS1702,CS105,IS112,0,0,0,0,4.0,IS215
@@ -18,6 +18,6 @@ Indu Sandya,indusandya@smu.edu.sg,IS112,IS113,IS1702,CS102,0,0,0,0,4.0,IS112/CS2
 Joseph Sung,josephsung@smu.edu.sg,CS206,IS215,IS214,IS1702,0,IS460,IS453,CS105,4.0,IS1702
 Preethi Rao,preethirao@smu.edu.sg,CS102,IS213,IS1702,IS112,IS215,IS113,IS453,CS106,4.0,IS1702
 Zhou Kankan,kkzhou@smu.edu.sg,CS105,IS460,IS453,IS112,CS206,IS113,IS213,IS214,4.0,
-Lydia Hamid,lydia@smu.edu.sg,0,0,0,0,0,0,0,0,4.0,
+Lydia Hamid,lydia@smu.edu.sg,CS106,0,0,0,0,0,0,0,4.0,
 New1,new1@smu.edu.sg,0,0,0,0,0,0,0,0,4.0,
 New2,new2@smu.edu.sg,0,0,0,0,0,0,0,0,4.0,

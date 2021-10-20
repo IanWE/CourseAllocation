@@ -72,21 +72,21 @@ class Calculator_greedy():
     def split_courses(self,a,b,W,div,rem,i,n):
         for j in range(div):#split courses
             #Course:Index
-            self.number_of_contained_courses.append(n/b['Ins/Sec'][i])
-            self.number_of_contained_act.append(n)
+            self.number_of_contained_courses.append(n)
+            self.number_of_contained_act.append(n*b['Ins/Sec'][i])
             self.correspond[b['Code'][i]] = self.correspond.get(b['Code'][i],[])#Code:[1,2,3]
             self.correspond[b['Code'][i]].append(len(W))
-            W.append([n]*a.shape[0])
+            W.append([n*b['Ins/Sec'][i]]*a.shape[0])
             self.course_list.append(b['Code'][i])
-            self.course_ins.append(n)
+            self.course_ins.append(n*b['Ins/Sec'][i])
         if rem != 0:
-            self.number_of_contained_courses.append(rem/b['Ins/Sec'][i])
-            self.number_of_contained_act.append(rem)
+            self.number_of_contained_courses.append(rem)
+            self.number_of_contained_act.append(rem*b['Ins/Sec'][i])
             self.correspond[b['Code'][i]] = self.correspond.get(b['Code'][i],[])#Code:[1,2,3]
             self.correspond[b['Code'][i]].append(len(W))
-            W.append([rem]*a.shape[0])
+            W.append([rem*b['Ins/Sec'][i]]*a.shape[0])
             self.course_list.append(b['Code'][i])
-            self.course_ins.append(rem)
+            self.course_ins.append(rem*b['Ins/Sec'][i])
         return W
         
     #preference weight * # of sections * workload - weight of history + penalty of multiple courses
@@ -108,8 +108,8 @@ class Calculator_greedy():
         self.preset = dict() #course:teachers
         for i in range(b.shape[0]):
             if type(b['PreAllocation'][i]) is not str:
-                div = int(sum_sec[i]/n)
-                rem = sum_sec[i]%n
+                div = int(b['Act'][i]/n)
+                rem = int(b['Act'][i])%n
                 W = self.split_courses(a,b,W,div,rem,i,n)
             elif "(" in b['PreAllocation'][i]:
                 #load all pre-setted courses
@@ -117,7 +117,7 @@ class Calculator_greedy():
                 pn = sum(map(int,pre_allocated_course))
                 if pn < b['Act'][i]:
                     #print(b['Code'][i],(b['Act'][i] - pn))
-                    s_sec = (b['Act'][i] - pn)*b['Ins/Sec'][i]
+                    s_sec = int(b['Act'][i] - pn)
                     div = int(s_sec/n)
                     rem = s_sec%n
                     W = self.split_courses(a,b,W,div,rem,i,n)
@@ -137,7 +137,7 @@ class Calculator_greedy():
                     self.pre_teacher_dict[p.split("(")[0]].append(code)
         print("Preset:")
         print(self.preset)
-        for j in range(self.instructor.shape[0]):
+        for j in range(1,self.instructor.shape[0]):
             npnh = [0]*len(W)
             preference = a.iloc[j,2:7].values
             #Allocate a course to instructors who do not have any preference
@@ -219,10 +219,7 @@ class Calculator_greedy():
                             temp[j] += self.config[4]
                 #Teachers should teach target number of classes
                 if teachers[j]+self.number_of_contained_act[i+base] > self.teacherMax[j]:
-                    if self.course_ins[i+base]<1:
-                        temp[j] += self.config["top"]/2
-                    else:
-                        temp[j] += self.config["top"]*(self.number_of_contained_act[i+base]+teachers[j]-self.teacherMax[j])
+                    temp[j] += self.config["top"]*(self.number_of_contained_act[i+base]+teachers[j]-self.teacherMax[j])
                 else:
                     temp[j] += self.config["bottom"]/(self.teacherMax[j]-teachers[j])
             temp = list(temp)
@@ -272,7 +269,7 @@ class Calculator_greedy():
             temp_strategy = []
             temp_course_list = []
             for i in range(len(self.greedytrace)):
-                for j in range(int(self.number_of_contained_act[i])):
+                for j in range(int(self.number_of_contained_courses[i])):
                     temp_strategy.append(self.greedytrace[i])
                     temp_course_list.append(self.course_list[i])
             tempbeststrategies.append(temp_strategy)
